@@ -6,7 +6,7 @@ using DG.Tweening;
 public class DoorProduction : MonoBehaviour
 {
     [Header("문 연출 관련")]
-    [SerializeField] bool m_isOpen = false;
+    public static bool m_isOpen = false;
     [SerializeField] Transform m_openTf = null;
     [SerializeField] Transform m_closeTf = null;
 
@@ -23,10 +23,25 @@ public class DoorProduction : MonoBehaviour
     {
         if(m_isOpen == false)
         {
-            m_isOpen = true;
-
             doorSeq = DOTween.Sequence()
-                            .Append(this.transform.DORotate(m_openTf.eulerAngles, 2f));
+                            .Append(this.transform.DOMove(m_openTf.position, 2f))
+                            .OnComplete(() =>
+                            {
+                                m_isOpen = true;
+                            });
+        }
+    }
+
+    public void DoorClose()
+    {
+        if (m_isOpen == true)
+        {
+            doorSeq = DOTween.Sequence()
+                            .Append(this.transform.DOMove(m_closeTf.position, 2f))
+                            .OnComplete(() =>
+                            {
+                                m_isOpen = false;
+                            });
         }
     }
 }
