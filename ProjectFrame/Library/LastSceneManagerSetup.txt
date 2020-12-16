@@ -1,13 +1,5 @@
 sceneSetups:
-- path: Assets/01Scenes/InGameScene4.unity
+- path: Assets/01Scenes/SampleScene.unity
   isLoaded: 1
   isActive: 1
-  isSubScene: 0
-- path: Assets/01Scenes/InGameScene3.unity
-  isLoaded: 0
-  isActive: 0
-  isSubScene: 0
-- path: Assets/Stylize Snow Texture/Scene/Stylize Snow.unity
-  isLoaded: 0
-  isActive: 0
   isSubScene: 0
