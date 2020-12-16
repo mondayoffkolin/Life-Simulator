@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.VFX;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -15,8 +16,14 @@ public class PlayerManager : MonoBehaviour
 
     [Header("이펙트")]
     [SerializeField] GameObject m_splashEffect = null;
+    [SerializeField] VisualEffect m_playerRunSplashEffect = null;       // 플레이어 달릴때 이펙트
 
-    private Animator m_animCtrl;
+    [Header("조이스틱 힘")]
+    [SerializeField] float m_moveForce = 0;
+
+    private Animator m_animCtrl = null;
+    private Rigidbody m_rigid = null;
+    private Joystick m_joystick = null;
 
     public static float m_multiplyCamZ = 1f;
 
@@ -25,6 +32,8 @@ public class PlayerManager : MonoBehaviour
     private void Awake()
     {
         m_animCtrl = GetComponent<Animator>();
+        m_rigid = GetComponent<Rigidbody>();
+        m_joystick = FindObjectOfType<Joystick>();
     }
 
     // Start is called before the first frame update
@@ -43,7 +52,7 @@ public class PlayerManager : MonoBehaviour
                 // === 플레이어 이동 === //
                 this.transform.Translate(Vector3.forward * m_moveSpeed * Time.deltaTime, Space.Self);
                 // === 플레이어 이동 === //
-
+                
                 break;
 
             case InGameManager.eGameStage.End:
@@ -56,6 +65,11 @@ public class PlayerManager : MonoBehaviour
     {
         m_animCtrl.SetTrigger("Push");
         m_splashEffect.SetActive(true);
+    }
+    public void SetGameOverAnim()
+    {
+        m_animCtrl.SetTrigger("GameOver");
+        m_splashEffect.SetActive(false);
     }
 
     public void SetPushAnimSpeedUp()
