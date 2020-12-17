@@ -150,13 +150,12 @@ public class CameraManager : MonoBehaviour
     Sequence camZoomOutSeq;
     public void SetFollowOffset2(eObstacleType a_obstacleType, GameObject a_obstacleObj)
     {
-        if ((int)SnowBallManager.uniqueInstance.m_curSnowBallSize >= 2)
+        if ((int)SnowBallManager.uniqueInstance.m_curSnowBallSize >= 1)
         {
             float a_y = m_followOffset.y - 65;
             float a_z = m_followOffset.z + 80;
 
             m_followOffset = new Vector3(m_followOffset.x, a_y, a_z);
-            print("Zoom In : " + m_followOffset);
 
 
             // === 캐릭터 회전 감도 === //
@@ -185,9 +184,9 @@ public class CameraManager : MonoBehaviour
                 case SnowBallManager.eSnowBallSize.Thirty:
                     SnowBallManager.uniqueInstance.m_curSnowBallSize = SnowBallManager.eSnowBallSize.TwentyFive;
                     camZoomOutSeq = DOTween.Sequence()
-                                        .Append(m_snowBallObj.transform.DOScale(new Vector3(25f, 25f, 25f), 1f))
-                                        .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 56), 1f))
-                                        .Join(this.transform.DOLocalMove(m_followOffset, 1f))
+                                        .Append(m_snowBallObj.transform.DOScale(new Vector3(25f, 25f, 25f), .6f))
+                                        .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 56), .6f))
+                                        .Join(this.transform.DOLocalMove(m_followOffset, .6f))
                                         .OnComplete(() =>
                                         {
                                              SnowBallManager.m_upgradeSnowBall = false;
@@ -198,9 +197,9 @@ public class CameraManager : MonoBehaviour
                 case SnowBallManager.eSnowBallSize.TwentyFive:
                     SnowBallManager.uniqueInstance.m_curSnowBallSize = SnowBallManager.eSnowBallSize.Twenty;
                     camZoomOutSeq = DOTween.Sequence()
-                                     .Append(m_snowBallObj.transform.DOScale(new Vector3(20f, 20f, 20f), 1f))
-                                     .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 50), 1f))
-                                      .Join(this.transform.DOLocalMove(m_followOffset, 1f))
+                                     .Append(m_snowBallObj.transform.DOScale(new Vector3(20f, 20f, 20f), .6f))
+                                     .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 50), .6f))
+                                      .Join(this.transform.DOLocalMove(m_followOffset, .6f))
                                      .AppendCallback(() =>
                                      {
                                              SnowBallManager.m_upgradeSnowBall = false;
@@ -211,9 +210,9 @@ public class CameraManager : MonoBehaviour
                 case SnowBallManager.eSnowBallSize.Twenty:
                     SnowBallManager.uniqueInstance.m_curSnowBallSize = SnowBallManager.eSnowBallSize.Fifteen;
                     camZoomOutSeq = DOTween.Sequence()
-                                     .Append(m_snowBallObj.transform.DOScale(new Vector3(15f, 15f, 15f), 1f))
-                                     .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 40), 1f))
-                                      .Join(this.transform.DOLocalMove(m_followOffset, 1f))
+                                     .Append(m_snowBallObj.transform.DOScale(new Vector3(15f, 15f, 15f), .6f))
+                                     .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 40), .6f))
+                                      .Join(this.transform.DOLocalMove(m_followOffset, .6f))
                                      .AppendCallback(() =>
                                      {
                                              SnowBallManager.m_upgradeSnowBall = false;
@@ -224,9 +223,9 @@ public class CameraManager : MonoBehaviour
                     SnowBallManager.uniqueInstance.m_curSnowBallSize = SnowBallManager.eSnowBallSize.Ten;
 
                     camZoomOutSeq = DOTween.Sequence()
-                                     .Append(m_snowBallObj.transform.DOScale(new Vector3(10f, 10f, 10f), 1f))
-                                     .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 33), 1f))
-                                      .Join(this.transform.DOLocalMove(m_followOffset, 1f))
+                                     .Append(m_snowBallObj.transform.DOScale(new Vector3(10f, 10f, 10f), .6f))
+                                     .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 33), .6f))
+                                      .Join(this.transform.DOLocalMove(m_followOffset, .6f))
                                      .AppendCallback(() =>
                                      {
                                              SnowBallManager.m_upgradeSnowBall = false;
@@ -237,16 +236,34 @@ public class CameraManager : MonoBehaviour
                     SnowBallManager.uniqueInstance.m_curSnowBallSize = SnowBallManager.eSnowBallSize.Five;
 
                     camZoomOutSeq = DOTween.Sequence()
-                                     .Append(m_snowBallObj.transform.DOScale(new Vector3(5f, 5f, 5f), 1f))
-                                     .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 21), 1f))
-                                     .Join(this.transform.DOLocalMove(m_followOffset, 1f))
+                                     .Append(m_snowBallObj.transform.DOScale(new Vector3(5f, 5f, 5f), .6f))
+                                     .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 21), .6f))
+                                     .Join(this.transform.DOLocalMove(m_followOffset, .6f))
                                      .AppendCallback(() =>
                                      {
                                             SnowBallManager.m_upgradeSnowBall = false;
                                      });
                     break;
+
+                case SnowBallManager.eSnowBallSize.Five:
+                    SnowBallManager.uniqueInstance.m_curSnowBallSize = SnowBallManager.eSnowBallSize.One;
+
+                    camZoomOutSeq = DOTween.Sequence()
+                                     .Append(m_snowBallObj.transform.DOScale(new Vector3(.8f, .8f, .8f), .6f))
+                                     .Join(m_snowBallObj.transform.DOLocalMove(new Vector3(0, 0, 8.8f), .6f))
+                                     .Join(this.transform.DOLocalMove(m_followOffset, .6f))
+                                     .AppendCallback(() =>
+                                     {
+                                         SnowBallManager.m_upgradeSnowBall = false;
+                                     });
+                    break;
             }
             // === 눈덩이 크기 === //
+
+
+            // === 캐릭터 달리기 스피드 === //
+            SnowBallManager.uniqueInstance.DegradeSnowBall(SnowBallManager.uniqueInstance.m_curSnowBallSize);
+            // === 캐릭터 달리기 스피드 === //
         }
         else
         {

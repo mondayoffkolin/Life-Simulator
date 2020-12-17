@@ -9,7 +9,7 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager uniqueInstance;
 
     [Header("플레이어 스탯")]
-    public float m_moveSpeed = 50f;
+    public float m_moveSpeed = 100f;
 
     [Header("스노우볼")]
     [SerializeField] GameObject m_snowBallObj = null;
@@ -21,11 +21,14 @@ public class PlayerManager : MonoBehaviour
     [Header("조이스틱 힘")]
     [SerializeField] float m_moveForce = 0;
 
+
     private Animator m_animCtrl = null;
     private Rigidbody m_rigid = null;
     private Joystick m_joystick = null;
 
+
     public static float m_multiplyCamZ = 1f;
+
 
     Sequence snowBallSeq;
 
@@ -90,13 +93,13 @@ public class PlayerManager : MonoBehaviour
                                    .AppendCallback(() =>
                                    {
                                        m_camSplahEffect.Play();
-                                       m_moveSpeed += 20;
+                                       m_moveSpeed += 50;
                                    })
                                    .AppendInterval(1.5f)
                                    .OnComplete(() =>
                                    {
                                        m_camSplahEffect.Stop();
-                                       m_moveSpeed -= 20;
+                                       m_moveSpeed -= 50;
                                    });
         }
     }

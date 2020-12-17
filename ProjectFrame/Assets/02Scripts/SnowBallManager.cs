@@ -163,7 +163,7 @@ public class SnowBallManager : MonoBehaviour
                 // === 카메라 줌아웃 및 팡!이펙트 === //
                 CameraManager.uniqueInstance.SetFollowOffset(true);
 
-                PlayerManager.uniqueInstance.m_moveSpeed = 120;
+                PlayerManager.uniqueInstance.m_moveSpeed += 20;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
                 m_curSnowBallSize = eSnowBallSize.Five;
@@ -173,7 +173,7 @@ public class SnowBallManager : MonoBehaviour
             case eSnowBallSize.Five:
                 CameraManager.uniqueInstance.SetFollowOffset();
 
-                PlayerManager.uniqueInstance.m_moveSpeed = 140;
+                PlayerManager.uniqueInstance.m_moveSpeed += 20;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
                 m_curSnowBallSize = eSnowBallSize.Ten;
@@ -182,7 +182,7 @@ public class SnowBallManager : MonoBehaviour
             case eSnowBallSize.Ten:
                 CameraManager.uniqueInstance.SetFollowOffset();
 
-                PlayerManager.uniqueInstance.m_moveSpeed = 170;
+                PlayerManager.uniqueInstance.m_moveSpeed += 30;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
                 m_curSnowBallSize = eSnowBallSize.Fifteen;
@@ -191,7 +191,7 @@ public class SnowBallManager : MonoBehaviour
             case eSnowBallSize.Fifteen:
                 CameraManager.uniqueInstance.SetFollowOffset();
 
-                PlayerManager.uniqueInstance.m_moveSpeed = 210;
+                PlayerManager.uniqueInstance.m_moveSpeed += 40;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
                 m_upgradeSnowBall = false;
@@ -201,7 +201,7 @@ public class SnowBallManager : MonoBehaviour
             case eSnowBallSize.Twenty:
                 CameraManager.uniqueInstance.SetFollowOffset();
 
-                PlayerManager.uniqueInstance.m_moveSpeed = 260;
+                PlayerManager.uniqueInstance.m_moveSpeed += 50;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
                 m_curSnowBallSize = eSnowBallSize.TwentyFive;               
@@ -210,7 +210,7 @@ public class SnowBallManager : MonoBehaviour
             case eSnowBallSize.TwentyFive:
                 CameraManager.uniqueInstance.SetFollowOffset();
 
-                PlayerManager.uniqueInstance.m_moveSpeed = 320;
+                PlayerManager.uniqueInstance.m_moveSpeed += 60;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
                 m_curSnowBallSize = eSnowBallSize.Thirty;
@@ -219,14 +219,46 @@ public class SnowBallManager : MonoBehaviour
             case eSnowBallSize.Thirty:
                 CameraManager.uniqueInstance.SetFollowOffset();
 
-                PlayerManager.uniqueInstance.m_moveSpeed = 390;
+                PlayerManager.uniqueInstance.m_moveSpeed += 70;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
                 m_curSnowBallSize = eSnowBallSize.ThirtyFive;
                 break;
         }
     }
+    public void DegradeSnowBall(eSnowBallSize a_snowBallSize)
+    {
+        switch (a_snowBallSize)
+        {
+            case eSnowBallSize.One:
+                PlayerManager.uniqueInstance.m_moveSpeed = 100;
+                break;
 
+            case eSnowBallSize.Five:
+                PlayerManager.uniqueInstance.m_moveSpeed = 120;
+                break;
+
+            case eSnowBallSize.Ten:
+                PlayerManager.uniqueInstance.m_moveSpeed = 140;
+                break;
+
+            case eSnowBallSize.Fifteen:
+                PlayerManager.uniqueInstance.m_moveSpeed = 170;
+                break;
+
+            case eSnowBallSize.Twenty:
+                PlayerManager.uniqueInstance.m_moveSpeed = 210;
+                break;
+
+            case eSnowBallSize.TwentyFive:
+                PlayerManager.uniqueInstance.m_moveSpeed = 260;
+                break;
+
+            case eSnowBallSize.Thirty:
+                PlayerManager.uniqueInstance.m_moveSpeed = 320;
+                break;
+        }
+    }
 
     public void RotateSnowBall()
     {
