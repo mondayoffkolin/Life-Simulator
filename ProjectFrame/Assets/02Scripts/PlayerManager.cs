@@ -69,11 +69,35 @@ public class PlayerManager : MonoBehaviour
     public void SetGameOverAnim()
     {
         m_animCtrl.SetTrigger("GameOver");
-        m_splashEffect.SetActive(false);
+        m_snowBallObj.SetActive(false);         // 굴리던 눈덩이 오브젝트 끄기
+        m_splashEffect.SetActive(false);        // 플레이어 달리는 이펙트 끄기
     }
 
     public void SetPushAnimSpeedUp()
     {
         m_animCtrl.speed += 1;
+    }
+
+
+    [Header("Fast Zone 이펙트")]
+    [SerializeField] ParticleSystem m_camSplahEffect = null;
+    Sequence playerFastSeq;
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.layer == LayerMask.NameToLayer("FastZone"))
+        {
+            playerFastSeq = DOTween.Sequence()
+                                   .AppendCallback(() =>
+                                   {
+                                       m_camSplahEffect.Play();
+                                       m_moveSpeed += 20;
+                                   })
+                                   .AppendInterval(1.5f)
+                                   .OnComplete(() =>
+                                   {
+                                       m_camSplahEffect.Stop();
+                                       m_moveSpeed -= 20;
+                                   });
+        }
     }
 }

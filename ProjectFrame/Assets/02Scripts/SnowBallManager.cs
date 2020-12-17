@@ -21,7 +21,7 @@ public class SnowBallManager : MonoBehaviour
         None
     }
 
-    public static eSnowBallSize m_curSnowBallSize;
+    public eSnowBallSize m_curSnowBallSize;
     //public static bool m_snowIncrease = true;
 
     [SerializeField] float m_snowBallIncreaseCount = 0.005f;        // 스노우볼 스케일 증가량
@@ -52,90 +52,90 @@ public class SnowBallManager : MonoBehaviour
                 {
                     switch(m_curSnowBallSize)
                     {
-                    case eSnowBallSize.One:
-                        m_snowBallIncreaseCount = 0.04f;
-                        m_snowBallPoxZIncreaseCount = 0.1f;
+                        case eSnowBallSize.One:
+                            m_snowBallIncreaseCount = 0.04f;
+                            m_snowBallPoxZIncreaseCount = 0.15f;
 
-                        if (this.transform.localScale.x >= 5)
-                        {
-                            m_upgradeSnowBall = true;
-                            UpgradeSnowBall(eSnowBallSize.One);
-                        }
-                        break;
-
-                     case eSnowBallSize.Five:
-                         m_snowBallIncreaseCount = 0.035f;
-                         m_snowBallPoxZIncreaseCount = 0.05f;
-
-                         if (this.transform.localScale.x >= 10)
-                         {
-                             m_upgradeSnowBall = true;
-                             UpgradeSnowBall(eSnowBallSize.Five);
-                         }
-                         break;
-
-                     case eSnowBallSize.Ten:
-                         m_snowBallIncreaseCount = 0.03f;
-                         m_snowBallPoxZIncreaseCount = 0.04f;
-
-                         if (this.transform.localScale.x >= 15)
-                         {
-                             m_upgradeSnowBall = true;
-                             UpgradeSnowBall(eSnowBallSize.Ten);
-                         }
-                         break;
-
-                     case eSnowBallSize.Fifteen:
-                         m_snowBallIncreaseCount = 0.025f;
-                         m_snowBallPoxZIncreaseCount = 0.03f;
-                     
-                         if (this.transform.localScale.x >= 20)
-                         {
-                             m_upgradeSnowBall = true;
-                             UpgradeSnowBall(eSnowBallSize.Fifteen);
-                         }
-                         break;
-                     
-                     case eSnowBallSize.Twenty:
-                         m_snowBallIncreaseCount = 0.02f;
-                         m_snowBallPoxZIncreaseCount = 0.02f;
-                     
-                     
-                         if (this.transform.localScale.x >= 25)
-                         {
-                             m_upgradeSnowBall = true;
-                             UpgradeSnowBall(eSnowBallSize.Twenty);
-                            }
-                            break;
-                        
-                     case eSnowBallSize.TwentyFive:
-                         m_snowBallIncreaseCount = 0.01f;
-                         m_snowBallPoxZIncreaseCount = 0.01f;
-
-
-                         if (this.transform.localScale.x >= 30)
-                         {
-                             m_upgradeSnowBall = true;
-                             UpgradeSnowBall(eSnowBallSize.TwentyFive);
-                         }
-                         break;
-
-                     case eSnowBallSize.Thirty:
-                         m_snowBallIncreaseCount = 0.005f;
-                         m_snowBallPoxZIncreaseCount = 0.005f;
-
-
-                            if (this.transform.localScale.x >= 35)
+                            if (this.transform.localScale.x >= 5)
                             {
-                                m_upgradeSnowBall = true;
-                                UpgradeSnowBall(eSnowBallSize.Thirty);
+                                //m_upgradeSnowBall = true;
+                                UpgradeSnowBall(eSnowBallSize.One);
                             }
                             break;
 
-                     case eSnowBallSize.ThirtyFive:
-                         m_snowBallIncreaseCount = 0.0025f;
-                         m_snowBallPoxZIncreaseCount = 0.005f;
+                         case eSnowBallSize.Five:
+                             m_snowBallIncreaseCount = 0.03f;
+                             m_snowBallPoxZIncreaseCount = 0.1f;
+
+                             if (this.transform.localScale.x >= 10)
+                             {
+                                 //m_upgradeSnowBall = true;
+                                 UpgradeSnowBall(eSnowBallSize.Five);
+                             }
+                             break;
+
+                         case eSnowBallSize.Ten:
+                            m_snowBallIncreaseCount = 0.02f;
+                            m_snowBallPoxZIncreaseCount = 0.05f;
+
+                            if (this.transform.localScale.x >= 15)
+                            {
+                                //m_upgradeSnowBall = true;
+                                UpgradeSnowBall(eSnowBallSize.Ten);
+                            }
+                            break;
+
+                         case eSnowBallSize.Fifteen:
+                             m_snowBallIncreaseCount = 0.01f;
+                             m_snowBallPoxZIncreaseCount = 0.025f;
+                         
+                             if (this.transform.localScale.x >= 20)
+                             {
+                                 //m_upgradeSnowBall = true;
+                                 UpgradeSnowBall(eSnowBallSize.Fifteen);
+                             }
+                             break;
+                         
+                         case eSnowBallSize.Twenty:
+                             m_snowBallIncreaseCount = 0.005f;
+                             m_snowBallPoxZIncreaseCount = 0.015f;
+                         
+                         
+                             if (this.transform.localScale.x >= 25)
+                             {
+                                 m_upgradeSnowBall = true;
+                                 UpgradeSnowBall(eSnowBallSize.Twenty);
+                                }
+                                break;
+                            
+                         case eSnowBallSize.TwentyFive:
+                             m_snowBallIncreaseCount = 0.0025f;
+                             m_snowBallPoxZIncreaseCount = 0.01f;
+
+
+                             if (this.transform.localScale.x >= 30)
+                             {
+                                 m_upgradeSnowBall = true;
+                                 UpgradeSnowBall(eSnowBallSize.TwentyFive);
+                         }
                          break;
+
+                        case eSnowBallSize.Thirty:
+                            m_snowBallIncreaseCount = 0.00015f;
+                            m_snowBallPoxZIncreaseCount = 0.005f;
+
+
+                               if (this.transform.localScale.x >= 35)
+                               {
+                                   m_upgradeSnowBall = true;
+                                   UpgradeSnowBall(eSnowBallSize.Thirty);
+                               }
+                               break;
+
+                        case eSnowBallSize.ThirtyFive:
+                            m_snowBallIncreaseCount = 0.0001f;
+                            m_snowBallPoxZIncreaseCount = 0.001f;
+                            break;
                     }
 
 
@@ -161,12 +161,11 @@ public class SnowBallManager : MonoBehaviour
         {
             case eSnowBallSize.One:
                 // === 카메라 줌아웃 및 팡!이펙트 === //
-                CameraManager.uniqueInstance.SetFollowOffset();
+                CameraManager.uniqueInstance.SetFollowOffset(true);
 
                 PlayerManager.uniqueInstance.m_moveSpeed = 120;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
-                m_upgradeSnowBall = false;
                 m_curSnowBallSize = eSnowBallSize.Five;
                 // === 카메라 줌아웃 및 팡!이펙트 === //
                 break;
@@ -177,7 +176,6 @@ public class SnowBallManager : MonoBehaviour
                 PlayerManager.uniqueInstance.m_moveSpeed = 140;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
-                m_upgradeSnowBall = false;
                 m_curSnowBallSize = eSnowBallSize.Ten;
                 break;
 
@@ -187,7 +185,6 @@ public class SnowBallManager : MonoBehaviour
                 PlayerManager.uniqueInstance.m_moveSpeed = 170;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
-                m_upgradeSnowBall = false;
                 m_curSnowBallSize = eSnowBallSize.Fifteen;
                 break;
 
@@ -207,7 +204,6 @@ public class SnowBallManager : MonoBehaviour
                 PlayerManager.uniqueInstance.m_moveSpeed = 260;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
-                m_upgradeSnowBall = false;
                 m_curSnowBallSize = eSnowBallSize.TwentyFive;               
                 break;
 
@@ -217,7 +213,6 @@ public class SnowBallManager : MonoBehaviour
                 PlayerManager.uniqueInstance.m_moveSpeed = 320;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
-                m_upgradeSnowBall = false;
                 m_curSnowBallSize = eSnowBallSize.Thirty;
                 break;
 
@@ -227,7 +222,6 @@ public class SnowBallManager : MonoBehaviour
                 PlayerManager.uniqueInstance.m_moveSpeed = 390;
                 PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
 
-                m_upgradeSnowBall = false;
                 m_curSnowBallSize = eSnowBallSize.ThirtyFive;
                 break;
         }

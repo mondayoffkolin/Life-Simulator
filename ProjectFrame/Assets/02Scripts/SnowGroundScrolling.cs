@@ -15,6 +15,7 @@ public class SnowGroundScrolling : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        this.transform.position += Vector3.back * m_groundMoveSpeed * Time.deltaTime;
+        if(InGameManager.m_curGameState == InGameManager.eGameStage.Play)
+            this.transform.position += Vector3.back * m_groundMoveSpeed * Time.deltaTime;
     }
 }
