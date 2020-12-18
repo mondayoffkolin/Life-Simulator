@@ -80,7 +80,7 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public virtual void OnPointerDown(PointerEventData eventData)
     {
-        m_canvasGroup.alpha = 1f;
+        m_canvasGroup.alpha = 0f;
 
         //SnowBallManager.m_isSnowBallIncrease = true;
         //OnDrag(eventData);

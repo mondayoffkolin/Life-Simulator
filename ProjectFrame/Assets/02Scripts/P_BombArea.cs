@@ -5,29 +5,26 @@ using DG.Tweening;
 
 public class P_BombArea : MonoBehaviour
 {
-    [SerializeField] Transform m_bombAreaTf = null;
+    [Header("포탄 발사 영역Tf")]
+    [SerializeField] Transform m_bombAreaTf = null;         
+
 
     [SerializeField] private Vector3 m_bombAreaVec = Vector3.zero;
 
+
     Sequence bombSeq;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        StartBombAreaDG();
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    /// <summary>
+    /// 포탄 발사 지역 생
+    /// </summary>
     public void StartBombAreaDG()
     {
         this.transform.DORotate(Vector3.up * 360, 1).SetEase(Ease.Linear).SetLoops(-1, LoopType.Incremental);
 
+
         Vector3 a_dir = Vector3.zero;
+
 
         bombSeq = DOTween.Sequence()
                         .OnStart(() =>
@@ -47,6 +44,10 @@ public class P_BombArea : MonoBehaviour
                         .SetLoops(-1);
     }
 
+    /// <summary>
+    /// 포탄 발사지역 벡터값 반환
+    /// </summary>
+    /// <returns></returns>
     private Vector3 BombArea()
     {
         float a_x = Random.Range(m_bombAreaTf.position.x - 500, m_bombAreaTf.position.x + 500);

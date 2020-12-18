@@ -5,263 +5,213 @@ using DG.Tweening;
 
 public class SnowBallManager : MonoBehaviour
 {
-    public static SnowBallManager uniqueInstance;
-
     public enum eSnowBallSize
     {
         One,
-        Five,
-        Ten,
-        Fifteen,
-        Twenty,
-        TwentyFive,
-        Thirty,
         ThirtyFive,
+        Ninety,
+        HundredFIf,
 
         None
     }
 
+
+    [Header("현재 눈덩이 크기레벨")]
     public eSnowBallSize m_curSnowBallSize;
-    //public static bool m_snowIncrease = true;
 
-    [SerializeField] float m_snowBallIncreaseCount = 0.005f;        // 스노우볼 스케일 증가량
-    [SerializeField] float m_snowBallPoxZIncreaseCount = 0.0035f;   // 눈덩이가 커짐에따른 눈덩이Z값위치
-    public static bool m_upgradeSnowBall = false;                // 눈덩이 크기 업!여부
 
-    [SerializeField] GameObject m_snowBallObj = null;               // 눈덩이 오브젝트
-    public static float m_snowBallRotateSpeed = 150f;                // 눈덩이 회전
+    [Header("눈덩이 오브젝트")]
+    [SerializeField] GameObject m_snowBallObj = null;                    // 눈덩이 오브젝트
+    public Vector3 m_snowBallIncreaseVec = new Vector3(.5f, .5f, .5f);  // 눈덩이 크지는 크기 벡터
 
-    Sequence snowBallSeq;
+    [Header("장애물과 눈덩이 관련")]
+    [SerializeField] Transform[] m_obstaclePosTf = null;
+    [SerializeField] Transform m_obstacleParentTf = null;                         // 장애물이 눈덩이에 속할 부모Tf
+
+
+    Sequence snowBallIncreaseSeq;           // 스노우볼 커지는 DoTween
+    Sequence snowBallDecreaseSeq;           // 스노우볼 작아지는 DoTween
 
 
     private void Start()
     {
-        uniqueInstance = this;
-
         m_curSnowBallSize = eSnowBallSize.One;
     }
 
-    // Update is called once per frame
-    void Update()
+
+    #region (GameState = Play) 스노우볼 크기 관련
+    /// <summary>
+    /// (GameState = Play)스노우볼 크기 증가/감소 함수
+    /// </summary>
+    /// <param name="m_isUp"></param>
+    public void SetSnowBallSize(bool m_isUp)
     {
-        switch (InGameManager.m_curGameState)
+        if(m_isUp == true)
         {
-            case InGameManager.eGameStage.Play:
+            #region 눈덩이 크기 증가 & 카메라 줌아웃
+            snowBallIncreaseSeq = DOTween.Sequence()
+                                    .Append(this.transform.DOScale(this.transform.localScale + m_snowBallIncreaseVec, .1f).SetEase(Ease.Linear))
+                                    .Join(this.transform.DOLocalMove(new Vector3(0, 0, this.transform.localPosition.z + .17f), .1f).SetEase(Ease.Linear))
+                                    .AppendCallback(() =>
+                                    {
+                                        switch (m_curSnowBallSize)
+                                        {
+                                            case eSnowBallSize.One:
+                                                if (this.transform.localScale.x >= 35)
+                                                {
+                                                    InGameManager.m_camMgr.SetFollowOffset(true);
+                                                    m_snowBallIncreaseVec = new Vector3(1f, 1f, 1f);
+                                                    m_curSnowBallSize = eSnowBallSize.ThirtyFive;
+                                                }
+                                                break;
 
-                if(m_upgradeSnowBall == false)
-                {
-                    switch(m_curSnowBallSize)
-                    {
-                        case eSnowBallSize.One:
-                            m_snowBallIncreaseCount = 0.04f;
-                            m_snowBallPoxZIncreaseCount = 0.15f;
+                                            case eSnowBallSize.ThirtyFive:
+                                                if (this.transform.localScale.x >= 90)
+                                                {
+                                                    InGameManager.m_camMgr.SetFollowOffset(true);
+                                                    m_snowBallIncreaseVec = new Vector3(1.4f, 1.4f, 1.4f);
+                                                    m_curSnowBallSize = eSnowBallSize.Ninety;
+                                                }
+                                                break;
 
-                            if (this.transform.localScale.x >= 5)
-                            {
-                                //m_upgradeSnowBall = true;
-                                UpgradeSnowBall(eSnowBallSize.One);
-                            }
-                            break;
+                                            case eSnowBallSize.Ninety:
+                                                if (this.transform.localScale.x >= 150)
+                                                {
+                                                    InGameManager.m_camMgr.SetFollowOffset(true);
+                                                    m_snowBallIncreaseVec = new Vector3(2f, 2f, 2f);
+                                                    m_curSnowBallSize = eSnowBallSize.HundredFIf;
+                                                }
+                                                break;
+                                        }
+                                    })
+                                    .SetLoops(-1, LoopType.Incremental);
+            #endregion
+        }
+        else
+        {
+            #region 눈덩이 크기 감소 & 카메라 줌인
+            switch (m_curSnowBallSize)
+            {
+                case eSnowBallSize.One:
+                    InGameManager.m_snowGround.StopGroundMoving();
+                    InGameManager.m_plyMgr.SetAnim_GameOver();          
+                    break;
 
-                         case eSnowBallSize.Five:
-                             m_snowBallIncreaseCount = 0.03f;
-                             m_snowBallPoxZIncreaseCount = 0.1f;
+                case eSnowBallSize.ThirtyFive:
+                    InGameManager.m_camMgr.SetFollowOffset(false);
 
-                             if (this.transform.localScale.x >= 10)
-                             {
-                                 //m_upgradeSnowBall = true;
-                                 UpgradeSnowBall(eSnowBallSize.Five);
-                             }
-                             break;
+                    snowBallDecreaseSeq = DOTween.Sequence()
+                                                 .Append(this.transform.DOScale(new Vector3(10f, 10f, 10f), .3f))
+                                                 .Join(this.transform.DOLocalMove(new Vector3(0, 0, 8.8f), .3f))
+                                                 .OnComplete(() =>
+                                                 {
+                                                     m_curSnowBallSize = eSnowBallSize.One;
 
-                         case eSnowBallSize.Ten:
-                            m_snowBallIncreaseCount = 0.02f;
-                            m_snowBallPoxZIncreaseCount = 0.05f;
+                                                     SetSnowBallSize(true);
 
-                            if (this.transform.localScale.x >= 15)
-                            {
-                                //m_upgradeSnowBall = true;
-                                UpgradeSnowBall(eSnowBallSize.Ten);
-                            }
-                            break;
+                                                     m_snowBallIncreaseVec = new Vector3(.5f, .5f, .5f);
+                                                 });
 
-                         case eSnowBallSize.Fifteen:
-                             m_snowBallIncreaseCount = 0.01f;
-                             m_snowBallPoxZIncreaseCount = 0.025f;
-                         
-                             if (this.transform.localScale.x >= 20)
-                             {
-                                 //m_upgradeSnowBall = true;
-                                 UpgradeSnowBall(eSnowBallSize.Fifteen);
-                             }
-                             break;
-                         
-                         case eSnowBallSize.Twenty:
-                             m_snowBallIncreaseCount = 0.005f;
-                             m_snowBallPoxZIncreaseCount = 0.015f;
-                         
-                         
-                             if (this.transform.localScale.x >= 25)
-                             {
-                                 m_upgradeSnowBall = true;
-                                 UpgradeSnowBall(eSnowBallSize.Twenty);
-                                }
-                                break;
-                            
-                         case eSnowBallSize.TwentyFive:
-                             m_snowBallIncreaseCount = 0.0025f;
-                             m_snowBallPoxZIncreaseCount = 0.01f;
+                    break;
 
+                case eSnowBallSize.Ninety:
+                    InGameManager.m_camMgr.SetFollowOffset(false);
 
-                             if (this.transform.localScale.x >= 30)
-                             {
-                                 m_upgradeSnowBall = true;
-                                 UpgradeSnowBall(eSnowBallSize.TwentyFive);
-                         }
-                         break;
+                    snowBallDecreaseSeq = DOTween.Sequence()
+                                                 .Append(this.transform.DOScale(new Vector3(50f, 50f, 50f), .3f))
+                                                 .Join(this.transform.DOLocalMove(new Vector3(0, 0, 22.5f), .3f))
+                                                 .OnComplete(() =>
+                                                 {
+                                                     m_curSnowBallSize = eSnowBallSize.ThirtyFive;
 
-                        case eSnowBallSize.Thirty:
-                            m_snowBallIncreaseCount = 0.00015f;
-                            m_snowBallPoxZIncreaseCount = 0.005f;
+                                                     SetSnowBallSize(true);
 
+                                                     m_snowBallIncreaseVec = new Vector3(1f, 1f, 1f);
+                                                 });
 
-                               if (this.transform.localScale.x >= 35)
-                               {
-                                   m_upgradeSnowBall = true;
-                                   UpgradeSnowBall(eSnowBallSize.Thirty);
-                               }
-                               break;
+                    break;
 
-                        case eSnowBallSize.ThirtyFive:
-                            m_snowBallIncreaseCount = 0.0001f;
-                            m_snowBallPoxZIncreaseCount = 0.001f;
-                            break;
-                    }
+                case eSnowBallSize.HundredFIf:
+                    InGameManager.m_camMgr.SetFollowOffset(false);
 
+                    snowBallDecreaseSeq = DOTween.Sequence()
+                                                 .Append(this.transform.DOScale(new Vector3(100f, 100f, 100f), .3f))
+                                                 .Join(this.transform.DOLocalMove(new Vector3(0, 0, 32f), .3f))
+                                                 .OnComplete(() =>
+                                                 {
+                                                     m_curSnowBallSize = eSnowBallSize.Ninety;
 
-                    // === 눈덩이 크기 증가 === //
-                    this.transform.localPosition = new Vector3(0, 0, this.transform.localPosition.z + m_snowBallPoxZIncreaseCount);
-                    this.transform.localScale += new Vector3(m_snowBallIncreaseCount, m_snowBallIncreaseCount, m_snowBallIncreaseCount);
-                    // === 눈덩이 크기 증가 === //
-                }
-                break;
+                                                     SetSnowBallSize(true);
 
-            case InGameManager.eGameStage.End:
-                break;
+                                                     m_snowBallIncreaseVec = new Vector3(1.4f, 1.4f, 1.4f);
+                                                 }); 
+
+                    break;
+            }
+            #endregion
         }
     }
 
     /// <summary>
-    /// 5배수로 눈덩이 커질때마다 호출되는 함수
+    /// (GameState = Play)스노우볼 (장애물에 의해/AI 흡수) 작아지는 순간 호출되는 함수
     /// </summary>
-    /// <param name="a_snowBallSize"></param>
-    private void UpgradeSnowBall(eSnowBallSize a_snowBallSize)
+    public void StopIncreaseSnowBall(bool a_isClear = false)
     {
-        switch(a_snowBallSize)
-        {
-            case eSnowBallSize.One:
-                // === 카메라 줌아웃 및 팡!이펙트 === //
-                CameraManager.uniqueInstance.SetFollowOffset(true);
+        snowBallIncreaseSeq.Kill();
 
-                PlayerManager.uniqueInstance.m_moveSpeed += 20;
-                PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
-
-                m_curSnowBallSize = eSnowBallSize.Five;
-                // === 카메라 줌아웃 및 팡!이펙트 === //
-                break;
-
-            case eSnowBallSize.Five:
-                CameraManager.uniqueInstance.SetFollowOffset();
-
-                PlayerManager.uniqueInstance.m_moveSpeed += 20;
-                PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
-
-                m_curSnowBallSize = eSnowBallSize.Ten;
-                break;
-
-            case eSnowBallSize.Ten:
-                CameraManager.uniqueInstance.SetFollowOffset();
-
-                PlayerManager.uniqueInstance.m_moveSpeed += 30;
-                PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
-
-                m_curSnowBallSize = eSnowBallSize.Fifteen;
-                break;
-
-            case eSnowBallSize.Fifteen:
-                CameraManager.uniqueInstance.SetFollowOffset();
-
-                PlayerManager.uniqueInstance.m_moveSpeed += 40;
-                PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
-
-                m_upgradeSnowBall = false;
-                m_curSnowBallSize = eSnowBallSize.Twenty;
-                break;
-
-            case eSnowBallSize.Twenty:
-                CameraManager.uniqueInstance.SetFollowOffset();
-
-                PlayerManager.uniqueInstance.m_moveSpeed += 50;
-                PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
-
-                m_curSnowBallSize = eSnowBallSize.TwentyFive;               
-                break;
-
-            case eSnowBallSize.TwentyFive:
-                CameraManager.uniqueInstance.SetFollowOffset();
-
-                PlayerManager.uniqueInstance.m_moveSpeed += 60;
-                PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
-
-                m_curSnowBallSize = eSnowBallSize.Thirty;
-                break;
-
-            case eSnowBallSize.Thirty:
-                CameraManager.uniqueInstance.SetFollowOffset();
-
-                PlayerManager.uniqueInstance.m_moveSpeed += 70;
-                PlayerManager.uniqueInstance.SetPushAnimSpeedUp();
-
-                m_curSnowBallSize = eSnowBallSize.ThirtyFive;
-                break;
-        }
-    }
-    public void DegradeSnowBall(eSnowBallSize a_snowBallSize)
-    {
-        switch (a_snowBallSize)
-        {
-            case eSnowBallSize.One:
-                PlayerManager.uniqueInstance.m_moveSpeed = 100;
-                break;
-
-            case eSnowBallSize.Five:
-                PlayerManager.uniqueInstance.m_moveSpeed = 120;
-                break;
-
-            case eSnowBallSize.Ten:
-                PlayerManager.uniqueInstance.m_moveSpeed = 140;
-                break;
-
-            case eSnowBallSize.Fifteen:
-                PlayerManager.uniqueInstance.m_moveSpeed = 170;
-                break;
-
-            case eSnowBallSize.Twenty:
-                PlayerManager.uniqueInstance.m_moveSpeed = 210;
-                break;
-
-            case eSnowBallSize.TwentyFive:
-                PlayerManager.uniqueInstance.m_moveSpeed = 260;
-                break;
-
-            case eSnowBallSize.Thirty:
-                PlayerManager.uniqueInstance.m_moveSpeed = 320;
-                break;
-        }
+        if(a_isClear == false)
+            SetSnowBallSize(false);
     }
 
+    /// <summary>
+    /// (GameState = Play) 장애물이 눈속에 달라붙는 함숭
+    /// </summary>
+    public void AttachToSnowBall(GameObject a_obstacle)
+    {
+        int a_rnd = Random.Range(0, m_obstaclePosTf.Length);
+        a_obstacle.transform.SetParent(m_obstacleParentTf.transform);
+        a_obstacle.transform.position = m_obstaclePosTf[a_rnd].position;
+        a_obstacle.transform.rotation = m_obstaclePosTf[a_rnd].rotation;
+        a_obstacle.transform.localScale = m_obstaclePosTf[a_rnd].localScale;
+    }
+    #endregion
+
+
+
+    #region 눈덩이 굴러가는 연출
+    /// <summary>
+    /// (GameState = Play)눈덩이 굴러가는 DoTween함수
+    /// </summary>
     public void RotateSnowBall()
     {
         m_snowBallObj.transform.DORotate(Vector3.right * 100, .2f).SetLoops(-1, LoopType.Incremental);
     }
+
+    /// <summary>
+    /// (GameState = End)눈덩이 굴러가는거 멈추는 DoTween함수 & 눈덩이에 박힌 장애물들 폭발
+    /// </summary>
+    public void StopRotateSnowBall()
+    {
+        m_snowBallObj.transform.DOKill();
+
+        ObstacleManager[] a_snowBall = new ObstacleManager[m_obstacleParentTf.childCount];
+        for (int n = 0; n < m_obstacleParentTf.childCount; n++)
+        {
+            a_snowBall[n] = m_obstacleParentTf.GetChild(n).GetComponent<ObstacleManager>();
+            a_snowBall[n].AddExplosion();
+        }
+    }
+    #endregion
+
+
+    #region (GameState = Clear) 스노우볼 굴러가기
+    /// <summary>
+    /// Clear시 스노우볼 굴러가는 함b
+    /// </summary>
+    public void RollSnowBall()
+    {
+        
+    }
+    #endregion
+
 }

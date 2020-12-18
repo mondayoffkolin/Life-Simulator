@@ -75,7 +75,7 @@ Material:
     m_Floats:
     - Vector1_462F38DA: 0.69
     - Vector1_4FC72571: 0.62
-    - Vector1_A15C1D97: 5
+    - Vector1_A15C1D97: 1
     - Vector1_A3BBE18F: 10
     - Vector1_CC278606: 0.58
     - _AlphaClip: 0
@@ -107,7 +107,7 @@ Material:
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _QueueOffset: 0
-    - _Radius: 0.1
+    - _Radius: 10
     - _ReceiveShadows: 1
     - _RimEnabled: 0
     - _SelfShadingSize: 0.5
