@@ -24,20 +24,21 @@ public class ObstacleManager : MonoBehaviour
 
 
     [Header("장애물 피해레벨")]
-    public eObstacleLevel m_curObstacleLevel;
+    public eObstacleLevel m_curObstacleLevel = eObstacleLevel.None;
 
 
     [Header("장애물 타입")]
-    [SerializeField] eObstacleType m_curObstacleType;
+    [SerializeField] eObstacleType m_curObstacleType = eObstacleType.None;
 
 
     BoxCollider m_boxCollider = null;           // 장애물 BoxCollider
-
+    Rigidbody m_rigid = null;
 
     // Start is called before the first frame update
     void Start()
     {
         m_boxCollider = GetComponent<BoxCollider>();
+        m_rigid = GetComponent<Rigidbody>();
     }
 
 
@@ -48,13 +49,13 @@ public class ObstacleManager : MonoBehaviour
     /// </summary>
     public void AddExplosion()
     {
-        Rigidbody a_rigid = GetComponent<Rigidbody>();
-        a_rigid.isKinematic = false;
+        m_rigid.isKinematic = false;
         m_boxCollider.enabled = true;
         m_boxCollider.isTrigger = false;
 
         Vector3 a_vec = ReturnForceVec();
-        a_rigid.AddForce(a_vec, ForceMode.Impulse);
+
+        m_rigid.AddExplosionForce(600, this.transform.position + a_vec, 10);
     }
     /// <summary>
     /// 터지는 방향 벡터 함
@@ -76,52 +77,51 @@ public class ObstacleManager : MonoBehaviour
     {
         if(other.gameObject.layer == LayerMask.NameToLayer("SnowBall"))
         {
-
             switch(m_curObstacleType)
             {
                 case eObstacleType.Tree:
 
-                    m_boxCollider.enabled = false;
+                    //m_boxCollider.enabled = false;
 
                     switch(m_curObstacleLevel)
                     {
                         case eObstacleLevel.Small:      
-                            InGameManager.m_snowBallMgr.AttachToSnowBall(this.gameObject);        // 현재 장애물 눈덩이 속으로
+                            InGameManager.m_snowBallMgr.AttachToSnowBall(eObstacleLevel.Small, this.gameObject);        // 현재 장애물 눈덩이 속으로
                             break;
 
 
                         case eObstacleLevel.Normal:
-                            if (InGameManager.m_snowBallMgr.m_curSnowBallSize == SnowBallManager.eSnowBallSize.Ninety)
+                            if (InGameManager.m_snowBallMgr.m_curSnowBallSize == SnowBallManager.eSnowBallSize.ThirtyFive)
                             {
-                                InGameManager.m_snowBallMgr.AttachToSnowBall(this.gameObject);        // 현재 장애물 눈덩이 속으로
+                                InGameManager.m_snowBallMgr.AttachToSnowBall(eObstacleLevel.Normal, this.gameObject);        // 현재 장애물 눈덩이 속으로
                             }
                             else
                             {
-                                m_boxCollider.enabled = false;
+                                //m_boxCollider.enabled = false;
 
                                 InGameManager.m_plyMgr.PlayCrashEffect(0);
-                                InGameManager.m_snowBallMgr.StopIncreaseSnowBall();                   // 눈덩이 크기 감소
+                                InGameManager.m_snowBallMgr.StopIncreaseSnowBall(InGameManager.m_plyMgr);                   // 눈덩이 크기 감소
                             }
                             break;
 
 
                         case eObstacleLevel.Middle:
-                            if (InGameManager.m_snowBallMgr.m_curSnowBallSize == SnowBallManager.eSnowBallSize.HundredFIf)
+                            if (InGameManager.m_snowBallMgr.m_curSnowBallSize == SnowBallManager.eSnowBallSize.Ninety)
                             {
-                                InGameManager.m_snowBallMgr.AttachToSnowBall(this.gameObject);        // 현재 장애물 눈덩이 속으로
+                                InGameManager.m_snowBallMgr.AttachToSnowBall(eObstacleLevel.Middle, this.gameObject);        // 현재 장애물 눈덩이 속으로
                             }
                             else
                             {
-                                m_boxCollider.enabled = false;
+                                //m_boxCollider.enabled = false;
 
                                 InGameManager.m_plyMgr.PlayCrashEffect(0);
-                                InGameManager.m_snowBallMgr.StopIncreaseSnowBall();                   // 눈덩이 크기 감소
+                                InGameManager.m_snowBallMgr.StopIncreaseSnowBall(InGameManager.m_plyMgr);                   // 눈덩이 크기 감소
                             }
                             break;
 
 
                         case eObstacleLevel.Large:
-                            m_boxCollider.enabled = false;
+                            //m_boxCollider.enabled = false;
 
                             InGameManager.m_plyMgr.PlayCrashEffect(0);
 
@@ -129,21 +129,103 @@ public class ObstacleManager : MonoBehaviour
                             InGameManager.m_snowBallMgr.m_curSnowBallSize = SnowBallManager.eSnowBallSize.One;
                             InGameManager.m_snowBallMgr.SetSnowBallSize(false);
                             // === 플레이어 바로 죽음 === //
+
+                            // ===  눈덩이 크기증가 Stop === //
+                            InGameManager.m_snowBallMgr.StopIncreaseSnowBall(InGameManager.m_plyMgr, true);         
+                            // ===  눈덩이 크기증가 Stop === //
                             break;
                     }
 
                     break;
                 case eObstacleType.Rock:
-                    m_boxCollider.enabled = false;
+                    //m_boxCollider.enabled = false;
 
                     InGameManager.m_plyMgr.PlayCrashEffect(1);
 
                     // === 플레이어 바로 죽음 === //
                     InGameManager.m_snowBallMgr.m_curSnowBallSize = SnowBallManager.eSnowBallSize.One;
-                    InGameManager.m_snowBallMgr.SetSnowBallSize(false);
+                    InGameManager.m_snowBallMgr.StopIncreaseSnowBall(InGameManager.m_plyMgr, true);
                     // === 플레이어 바로 죽음 === //
+                    
+                    break;
+            }
+        }
+        else if(other.gameObject.layer == LayerMask.NameToLayer("SnowBall_E"))
+        {
+            SnowBallManager a_snowBallMgr = other.transform.parent.GetComponent<SnowBallManager>();
+            AIManager a_aiMgr = a_snowBallMgr.m_parentTf.GetComponent<AIManager>();
 
-                    InGameManager.m_snowBallMgr.StopIncreaseSnowBall();                   // 눈덩이 크기 감소
+
+            switch (m_curObstacleType)
+            {
+                case eObstacleType.Tree:
+
+                    //m_boxCollider.enabled = false;
+
+                    switch (m_curObstacleLevel)
+                    {
+                        case eObstacleLevel.Small:
+                            a_snowBallMgr.AttachToSnowBall(eObstacleLevel.Small, this.gameObject);
+                            break;
+
+
+                        case eObstacleLevel.Normal:
+                            if (a_snowBallMgr.m_curSnowBallSize == SnowBallManager.eSnowBallSize.ThirtyFive)
+                            {
+                                a_snowBallMgr.AttachToSnowBall(eObstacleLevel.Normal, this.gameObject);        // 현재 장애물 눈덩이 속으로
+                            }
+                            else
+                            {
+                                //m_boxCollider.enabled = false;
+
+                                a_aiMgr.PlayCrashEffect(0);
+                                a_snowBallMgr.StopIncreaseAiSnowBall(a_aiMgr);                   // 눈덩이 크기 감소
+                            }
+                            break;
+
+
+                        case eObstacleLevel.Middle:
+                            if (a_snowBallMgr.m_curSnowBallSize == SnowBallManager.eSnowBallSize.Ninety)
+                            {
+                                a_snowBallMgr.AttachToSnowBall(eObstacleLevel.Middle, this.gameObject);        // 현재 장애물 눈덩이 속으로
+                            }
+                            else
+                            {
+                                //m_boxCollider.enabled = false;
+
+                                a_aiMgr.PlayCrashEffect(0);
+                                a_snowBallMgr.StopIncreaseAiSnowBall(a_aiMgr);                   // 눈덩이 크기 감소
+                            }
+                            break;
+
+
+                        case eObstacleLevel.Large:
+                            //m_boxCollider.enabled = false;
+
+                            a_aiMgr.PlayCrashEffect(0);
+
+                            // === Ai 바로 죽음 === //
+                            a_snowBallMgr.m_curSnowBallSize = SnowBallManager.eSnowBallSize.One;
+                            a_snowBallMgr.SetSnowBallSize(false);
+                            // === Ai 바로 죽음 === //
+
+                            // ===  눈덩이 크기증가 Stop === //
+                            a_snowBallMgr.StopIncreaseAiSnowBall(a_aiMgr, true);
+                            // ===  눈덩이 크기증가 Stop === //
+                            break;
+                    }
+
+                    break;
+                case eObstacleType.Rock:
+                    //m_boxCollider.enabled = false;
+
+                    a_aiMgr.PlayCrashEffect(1);
+
+                    // === Ai 바로 죽음 === //
+                    a_snowBallMgr.m_curSnowBallSize = SnowBallManager.eSnowBallSize.One;
+                    a_snowBallMgr.StopIncreaseAiSnowBall(a_aiMgr, true);
+                    // === Ai 바로 죽음 === //
+
                     break;
             }
         }

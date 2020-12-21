@@ -42,6 +42,8 @@ public class FastZoneTrailManager : MonoBehaviour
 
         if (m_playerObj == null)
             m_playerObj = InGameManager.m_plyMgr.gameObject.transform;
+
+        InGameManager.uniqueInstance.m_curGameState = InGameManager.eGameState.Start;
     }
 
 

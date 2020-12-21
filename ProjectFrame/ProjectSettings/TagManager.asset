@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - UiCam
+  - FxTemporaire
+  - PlayerStartPos
+  - CameraStartPos
+  - SnowBall
   layers:
   - Default
   - TransparentFX
@@ -20,8 +24,8 @@ TagManager:
   - Obstacle
   - FastZone
   - GoalLine
-  - 
-  - 
+  - Enemy
+  - SnowBall_E
   - 
   - 
   - 
