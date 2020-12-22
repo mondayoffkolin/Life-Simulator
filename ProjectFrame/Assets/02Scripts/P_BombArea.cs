@@ -14,7 +14,6 @@ public class P_BombArea : MonoBehaviour
 
     Sequence bombSeq;
 
-
     /// <summary>
     /// 포탄 발사 지역 생
     /// </summary>
@@ -50,8 +49,8 @@ public class P_BombArea : MonoBehaviour
     /// <returns></returns>
     private Vector3 BombArea()
     {
-        float a_x = Random.Range(m_bombAreaTf.position.x - 500, m_bombAreaTf.position.x + 500);
-        float a_z = Random.Range(m_bombAreaTf.position.z - 500, m_bombAreaTf.position.z + 500);
+        float a_x = Random.Range(m_bombAreaTf.position.x - 400, m_bombAreaTf.position.x + 400);
+        float a_z = Random.Range(m_bombAreaTf.position.z - 400, m_bombAreaTf.position.z + 400);
 
         return new Vector3(a_x, 0, a_z);
     }

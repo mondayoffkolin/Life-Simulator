@@ -21,6 +21,7 @@ public class InGameManager : MonoBehaviour
 
     [Header("현재 게임 상태")]
     public eGameState m_curGameState;
+    [SerializeField] bool m_isPlay = true;
 
 
     [Header("객체 인스턴스")]
@@ -51,7 +52,8 @@ public class InGameManager : MonoBehaviour
         QualitySettings.vSyncCount = 0;
         // === 플랫폼 초기 세팅 === //
 
-        GameStartDoTween();
+        if(m_isPlay == true)
+            GameStartDoTween();
     }
 
 
@@ -92,20 +94,16 @@ public class InGameManager : MonoBehaviour
                                            m_aiMgrs[n].SetPlayerStartPos();                 // AI StartPos 초기화
                                            m_aiMgrs[n].SetAIPath();                         // AI StartPos 초기화
                                        }
-
-                                       m_aiPathMgr.SetPathRoot();
                                        // === AI 초기화 관련 === //
                                    })
                                    .AppendInterval(2f)
-                                   .AppendCallback(() =>
+                                   .OnComplete(() =>
                                    {
                                        // === 게임 시작! === //
                                        PlayPlayerGame();
                                        PlayAiGame();
                                        // === 게임 시작! === //
-                                   })
-                                   .OnComplete(() =>
-                                   {
+
                                        m_curGameState = eGameState.Play;            // GameState (Play)
                                    });
     }
@@ -142,17 +140,15 @@ public class InGameManager : MonoBehaviour
         // === 플레이어 관련 === //
         m_plyMgr.SetAnim_Push();                        // 플레이어 Push Anim 실행
         m_plyMgr.m_isMoving = true;                     // 플레이어 움직임 여부
-        m_plyMgr.m_snowBallMgr.RotateSnowBall();        // 스노우볼 굴러가는 함수
+        //m_plyMgr.m_snowBallMgr.RotateSnowBall();        // 스노우볼 굴러가는 함수
         m_plyMgr.m_snowBallMgr.SetSnowBallSize(true);   // 스노우볼 사이즈업 함수
         StartCoroutine(m_plyMgr.PlayerMoving());        // 플레이어 Forward 방향 코루틴
-
-        //m_snowBallMgr.RotateSnowBall();               // 스노우볼 굴러가는 함수
-        //m_snowBallMgr.SetSnowBallSize(true);          // 스노우볼 사이즈업 함수
         // === 플레이어 관련 === //
 
 
-        //m_snowGround.GroundMoving();                 // (★고민중)}
+        //m_snowGround.GroundMoving();                 // (★고민중)
     }
+
 
     public void PlayAiGame()
     {
@@ -161,8 +157,8 @@ public class InGameManager : MonoBehaviour
         {
             m_aiMgrs[n].SetAnim_Push();
             m_aiMgrs[n].m_isMoving = true;
-            m_aiMgrs[n].m_snowBallMgr.RotateSnowBall();
-            m_aiMgrs[n].m_snowBallMgr.SetSnowBallSize(true);
+            //m_aiMgrs[n].m_snowBallMgr.RotateSnowBall();
+            m_aiMgrs[n].m_snowBallMgr.SetSnowBallSize(true, false);
             StartCoroutine(m_aiMgrs[n].PlayerMoving());
         }
         // === AI 관련 === //

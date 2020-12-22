@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public enum eObstacleLevel
 {
@@ -34,13 +35,12 @@ public class ObstacleManager : MonoBehaviour
     BoxCollider m_boxCollider = null;           // 장애물 BoxCollider
     Rigidbody m_rigid = null;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        m_boxCollider = GetComponent<BoxCollider>();
-        m_rigid = GetComponent<Rigidbody>();
-    }
 
+    private void Awake()
+    {
+        m_boxCollider = this.GetComponent<BoxCollider>();
+        m_rigid = this.GetComponent<Rigidbody>();
+    }
 
 
     #region (GameState = End) 플레이어가 죽었을시 호출되는 영역
@@ -49,13 +49,25 @@ public class ObstacleManager : MonoBehaviour
     /// </summary>
     public void AddExplosion()
     {
-        m_rigid.isKinematic = false;
-        m_boxCollider.enabled = true;
-        m_boxCollider.isTrigger = false;
+        if (m_rigid != null)
+            m_rigid.isKinematic = false;
+        else
+            print("ObstacleManager Rigidbody 없음");
+
+
+        //if (m_boxCollider != null)
+        //{
+        //    m_boxCollider.enabled = true;
+        //    m_boxCollider.isTrigger = false;
+        //}
+        //else
+        //    print("ObstacleManager Boxcollider 없음");
+
 
         Vector3 a_vec = ReturnForceVec();
 
-        m_rigid.AddExplosionForce(600, this.transform.position + a_vec, 10);
+        m_rigid.AddForce(a_vec, ForceMode.VelocityChange);
+        this.transform.DOScale(Vector3.zero, 2f);
     }
     /// <summary>
     /// 터지는 방향 벡터 함
@@ -63,9 +75,9 @@ public class ObstacleManager : MonoBehaviour
     /// <returns></returns>
     private Vector3 ReturnForceVec()
     {
-        float a_x = Random.Range(-20, 20);
-        float a_y = Random.Range(5, 10);
-        float a_z = Random.Range(-20, 20);
+        float a_x = Random.Range(-50, 50);
+        float a_y = Random.Range(40, 50);
+        float a_z = Random.Range(-50, 50);
 
         return new Vector3(a_x, a_y, a_z);
     }
@@ -77,11 +89,13 @@ public class ObstacleManager : MonoBehaviour
     {
         if(other.gameObject.layer == LayerMask.NameToLayer("SnowBall"))
         {
-            switch(m_curObstacleType)
+            if(InGameManager.m_plyMgr.m_playerState == ePlayerState.Run)
+            {
+                switch(m_curObstacleType)
             {
                 case eObstacleType.Tree:
 
-                    //m_boxCollider.enabled = false;
+                    m_boxCollider.enabled = false;
 
                     switch(m_curObstacleLevel)
                     {
@@ -97,8 +111,6 @@ public class ObstacleManager : MonoBehaviour
                             }
                             else
                             {
-                                //m_boxCollider.enabled = false;
-
                                 InGameManager.m_plyMgr.PlayCrashEffect(0);
                                 InGameManager.m_snowBallMgr.StopIncreaseSnowBall(InGameManager.m_plyMgr);                   // 눈덩이 크기 감소
                             }
@@ -112,8 +124,6 @@ public class ObstacleManager : MonoBehaviour
                             }
                             else
                             {
-                                //m_boxCollider.enabled = false;
-
                                 InGameManager.m_plyMgr.PlayCrashEffect(0);
                                 InGameManager.m_snowBallMgr.StopIncreaseSnowBall(InGameManager.m_plyMgr);                   // 눈덩이 크기 감소
                             }
@@ -121,33 +131,27 @@ public class ObstacleManager : MonoBehaviour
 
 
                         case eObstacleLevel.Large:
-                            //m_boxCollider.enabled = false;
-
                             InGameManager.m_plyMgr.PlayCrashEffect(0);
 
-                            // === 플레이어 바로 죽음 === //
-                            InGameManager.m_snowBallMgr.m_curSnowBallSize = SnowBallManager.eSnowBallSize.One;
-                            InGameManager.m_snowBallMgr.SetSnowBallSize(false);
-                            // === 플레이어 바로 죽음 === //
-
-                            // ===  눈덩이 크기증가 Stop === //
-                            InGameManager.m_snowBallMgr.StopIncreaseSnowBall(InGameManager.m_plyMgr, true);         
-                            // ===  눈덩이 크기증가 Stop === //
+                            // === 플레이어 바로 죽음 & 눈덩이 크기증가 Stop === //
+                            InGameManager.m_snowBallMgr.StopIncreaseSnowBall(InGameManager.m_plyMgr, true);
+                            // === 플레이어 바로 죽음 & 눈덩이 크기증가 Stop === //
                             break;
                     }
 
                     break;
+
+
                 case eObstacleType.Rock:
                     //m_boxCollider.enabled = false;
 
                     InGameManager.m_plyMgr.PlayCrashEffect(1);
 
                     // === 플레이어 바로 죽음 === //
-                    InGameManager.m_snowBallMgr.m_curSnowBallSize = SnowBallManager.eSnowBallSize.One;
                     InGameManager.m_snowBallMgr.StopIncreaseSnowBall(InGameManager.m_plyMgr, true);
                     // === 플레이어 바로 죽음 === //
-                    
                     break;
+            }
             }
         }
         else if(other.gameObject.layer == LayerMask.NameToLayer("SnowBall_E"))
@@ -155,12 +159,13 @@ public class ObstacleManager : MonoBehaviour
             SnowBallManager a_snowBallMgr = other.transform.parent.GetComponent<SnowBallManager>();
             AIManager a_aiMgr = a_snowBallMgr.m_parentTf.GetComponent<AIManager>();
 
-
-            switch (m_curObstacleType)
+            if(a_aiMgr.m_playerState == ePlayerState.Run)
+            {
+                switch (m_curObstacleType)
             {
                 case eObstacleType.Tree:
 
-                    //m_boxCollider.enabled = false;
+                    m_boxCollider.enabled = false;
 
                     switch (m_curObstacleLevel)
                     {
@@ -176,8 +181,6 @@ public class ObstacleManager : MonoBehaviour
                             }
                             else
                             {
-                                //m_boxCollider.enabled = false;
-
                                 a_aiMgr.PlayCrashEffect(0);
                                 a_snowBallMgr.StopIncreaseAiSnowBall(a_aiMgr);                   // 눈덩이 크기 감소
                             }
@@ -191,8 +194,6 @@ public class ObstacleManager : MonoBehaviour
                             }
                             else
                             {
-                                //m_boxCollider.enabled = false;
-
                                 a_aiMgr.PlayCrashEffect(0);
                                 a_snowBallMgr.StopIncreaseAiSnowBall(a_aiMgr);                   // 눈덩이 크기 감소
                             }
@@ -200,33 +201,25 @@ public class ObstacleManager : MonoBehaviour
 
 
                         case eObstacleLevel.Large:
-                            //m_boxCollider.enabled = false;
-
                             a_aiMgr.PlayCrashEffect(0);
 
-                            // === Ai 바로 죽음 === //
-                            a_snowBallMgr.m_curSnowBallSize = SnowBallManager.eSnowBallSize.One;
-                            a_snowBallMgr.SetSnowBallSize(false);
-                            // === Ai 바로 죽음 === //
-
-                            // ===  눈덩이 크기증가 Stop === //
+                            // === Ai 바로 죽음 & 눈덩이 크기증가 Stop === //
                             a_snowBallMgr.StopIncreaseAiSnowBall(a_aiMgr, true);
-                            // ===  눈덩이 크기증가 Stop === //
+                            // === Ai 바로 죽음 & 눈덩이 크기증가 Stop === //
                             break;
                     }
 
                     break;
-                case eObstacleType.Rock:
-                    //m_boxCollider.enabled = false;
 
+
+                case eObstacleType.Rock:
                     a_aiMgr.PlayCrashEffect(1);
 
                     // === Ai 바로 죽음 === //
-                    a_snowBallMgr.m_curSnowBallSize = SnowBallManager.eSnowBallSize.One;
                     a_snowBallMgr.StopIncreaseAiSnowBall(a_aiMgr, true);
                     // === Ai 바로 죽음 === //
-
                     break;
+            }
             }
         }
     }
