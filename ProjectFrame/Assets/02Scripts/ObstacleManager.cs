@@ -66,8 +66,9 @@ public class ObstacleManager : MonoBehaviour
 
         Vector3 a_vec = ReturnForceVec();
 
-        m_rigid.AddForce(a_vec, ForceMode.VelocityChange);
-        this.transform.DOScale(Vector3.zero, 2f);
+        m_rigid.AddForce(a_vec, ForceMode.Impulse);
+        //m_rigid.AddExplosionForce(1000f, this.transform.position, 10 , 300);
+        this.transform.DOScale(Vector3.zero, 4f);
     }
     /// <summary>
     /// 터지는 방향 벡터 함
@@ -75,9 +76,9 @@ public class ObstacleManager : MonoBehaviour
     /// <returns></returns>
     private Vector3 ReturnForceVec()
     {
-        float a_x = Random.Range(-50, 50);
-        float a_y = Random.Range(40, 50);
-        float a_z = Random.Range(-50, 50);
+        float a_x = Random.Range(-70, 70);
+        float a_y = Random.Range(40, 70);
+        float a_z = Random.Range(-70, 70);
 
         return new Vector3(a_x, a_y, a_z);
     }

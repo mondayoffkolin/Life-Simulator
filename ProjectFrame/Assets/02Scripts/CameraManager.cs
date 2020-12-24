@@ -13,8 +13,8 @@ public class CameraManager : MonoBehaviour
 
 
     public Quaternion TargetRotation;                              // (GameState = Play)최종적으로 축적된 Gap이 이 변수에 저장됨.
-    public float m_rotationSpeed = 5;                             // (GameState = Play)터치시 플레이어 회전 스피드.
-    private float m_originRotationSpeed = 5;                             // (GameState = Play)터치시 플레이어 회전 스피드.
+    public float m_rotationSpeed = 8;                             // (GameState = Play)터치시 플레이어 회전 스피드.
+    [SerializeField] private float m_originRotationSpeed = 5;                             // (GameState = Play)터치시 플레이어 회전 스피드.
     private Vector3 Gap = Vector3.zero;                            // (GameState = Play)회전 축적 값.
     private Vector3 m_followOffset = new Vector3(0, 60, -90);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
 
@@ -37,7 +37,9 @@ public class CameraManager : MonoBehaviour
 
             if(Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer)
             {
-                 if (Input.touchCount > 0)
+                if(InGameManager.m_plyMgr.m_playerState == ePlayerState.Run)
+                {
+                    if (Input.touchCount > 0)
                  {
                      Touch a_touch = Input.GetTouch(0);
             
@@ -54,27 +56,31 @@ public class CameraManager : MonoBehaviour
                          Gap.y += Input.GetAxis("Mouse X") * m_rotationSpeed;
             
                          Gap.y += InGameManager.m_joystick.Horizontal;
-                         Gap.y = Mathf.Clamp(Gap.y, -45f, 45f);
+                         Gap.y = Mathf.Clamp(Gap.y, -80f, 80f);
             
                          TargetRotation = Quaternion.Euler(Gap);
                      }
                  }
+                }
             }
             else
             {
-                 if (Input.GetMouseButton(0))
-                 {
-                     if (transform.rotation != TargetRotation)
-                         m_playerTf.transform.rotation = Quaternion.Slerp(m_playerTf.transform.rotation, TargetRotation, m_rotationSpeed * Time.deltaTime);
-                
-                     //Gap.x += Input.GetAxis("Mouse Y") * m_rotationSpeed * -1;
-                     Gap.y += Input.GetAxis("Mouse X") * m_rotationSpeed;
-                
-                     Gap.y += InGameManager.m_joystick.Horizontal;
-                     Gap.y = Mathf.Clamp(Gap.y, -45f, 45f);
-                
-                     TargetRotation = Quaternion.Euler(Gap);
-                 }
+                if (InGameManager.m_plyMgr.m_playerState == ePlayerState.Run)
+                {
+                    if (Input.GetMouseButton(0))
+                    {
+                        if (transform.rotation != TargetRotation)
+                            m_playerTf.transform.rotation = Quaternion.Slerp(m_playerTf.transform.rotation, TargetRotation, m_rotationSpeed * Time.deltaTime);
+
+                        //Gap.x += Input.GetAxis("Mouse Y") * m_rotationSpeed * -1;
+                        Gap.y += Input.GetAxis("Mouse X") * m_rotationSpeed;
+
+                        Gap.y += InGameManager.m_joystick.Horizontal;
+                        Gap.y = Mathf.Clamp(Gap.y, -80f, 80f);
+
+                        TargetRotation = Quaternion.Euler(Gap);
+                    }
+                }
             }
             #endregion
         }
@@ -84,29 +90,44 @@ public class CameraManager : MonoBehaviour
     /// <summary>
     /// (GameState = Ready)카메라 => 플레이어 뒤로 이동 함수 (연출)
     /// </summary>
-    public void CamToPlayerProduction()
+    public void CamToPlayerProduction(bool a_gameStart = false)
     {
-        Sequence camPdSeq;
+        //Sequence camPdSeq;
 
         m_camStartPosTf = GameObject.FindGameObjectWithTag("CameraStartPos").transform;
 
-        camPdSeq = DOTween.Sequence()
-                          .OnStart(() =>
-                          {
-                              m_rotationSpeed = m_originRotationSpeed;
-                          })
-                          .Append(this.transform.DOMove(m_camStartPosTf.position, 1f))
-                          .Join(this.transform.DOLocalRotate(m_camStartPosTf.eulerAngles, 1f))
-                          .Append(this.transform.DOLookAt(m_lookPosTf.position, .5f))
-                          .AppendCallback(() =>
-                          {
-                              this.transform.SetParent(m_playerTf.transform);
-                          })
-                          .AppendInterval(1.5f)
+        m_rotationSpeed = m_originRotationSpeed;
+
+        this.transform.DOMove(m_camStartPosTf.position, 1f);
+        this.transform.DOLocalRotate(m_camStartPosTf.eulerAngles, 1f)
                           .OnComplete(() =>
                           {
-                              InGameManager.uniqueInstance.PlayPlayerGame();
+                              this.transform.SetParent(m_playerTf.transform);
+                              this.transform.DOLookAt(m_lookPosTf.position, .5f).SetDelay(1.5f)
+                                                .OnComplete(() =>
+                                                {
+                                                    if(a_gameStart == false)
+                                                        InGameManager.uniqueInstance.PlayPlayerGame();
+                                                });
                           });
+
+        //camPdSeq = DOTween.Sequence()
+        //                  .OnStart(() =>
+        //                  {
+        //                      m_rotationSpeed = m_originRotationSpeed;
+        //                  })
+        //                  .Append(this.transform.DOMove(m_camStartPosTf.position, 1f))
+        //                  .Join(this.transform.DOLocalRotate(m_camStartPosTf.eulerAngles, 1f))
+        //                  .Append(this.transform.DOLookAt(m_lookPosTf.position, .5f))
+        //                  .AppendCallback(() =>
+        //                  {
+        //                      this.transform.SetParent(m_playerTf.transform);
+        //                  })
+        //                  .AppendInterval(1.5f)
+        //                  .OnComplete(() =>
+        //                  {
+        //                      InGameManager.uniqueInstance.PlayPlayerGame();
+        //                  });
     }
 
     
@@ -130,7 +151,7 @@ public class CameraManager : MonoBehaviour
             Vector3  a_followOffset = this.transform.localPosition + m_followOffset;
             // print("Cam Pos : " + a_followOffset);
 
-            this.transform.DOLocalMove(a_followOffset, .4f)
+            this.transform.DOLocalMove(a_followOffset, .6f)
                           .SetEase(Ease.InQuad);
             // === 카메라 줌아웃 === //
 
@@ -145,7 +166,7 @@ public class CameraManager : MonoBehaviour
             Vector3 a_followOffset = this.transform.localPosition - m_followOffset;
             //print("Cam Pos : " + a_followOffset);
 
-            this.transform.DOLocalMove(a_followOffset, .3f)
+            this.transform.DOLocalMove(a_followOffset, .6f)
                           .SetEase(Ease.InQuad);
             // === 카메라 줌인 === //
 

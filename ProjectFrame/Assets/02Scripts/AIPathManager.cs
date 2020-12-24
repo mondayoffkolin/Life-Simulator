@@ -20,7 +20,7 @@ public class AIPathManager : MonoBehaviour
         m_pathRoots = new Transform[this.transform.childCount];                 // Path 개수만큼 할당
 
         for (int n = 0; n < m_pathRoots.Length; n++)
-            m_pathRoots[n] = this.transform.GetChild(n).transform;              // Path 대입
+            m_pathRoots[n] = this.transform.GetChild(n).transform;                // Path 대입
 
 
         int a_rndPath = Random.Range(0, m_pathRoots.Length);

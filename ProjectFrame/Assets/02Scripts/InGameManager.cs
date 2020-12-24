@@ -78,7 +78,7 @@ public class InGameManager : MonoBehaviour
                                    .AppendCallback(() =>
                                    {
                                        // === 게임시작시 카메라 => 플레이어 뒤로 이동 (연출) === //
-                                       m_camMgr.CamToPlayerProduction();                    // GameState (Start)
+                                       m_camMgr.CamToPlayerProduction(true);                    // GameState (Start)
                                        // === 게임시작시 카메라 => 플레이어 뒤로 이동 (연출) === //
 
 
@@ -89,14 +89,14 @@ public class InGameManager : MonoBehaviour
 
 
                                        // === AI 초기화 관련 === //
-                                       for(int n = 0; n < m_aiMgrs.Length; n++)
+                                       for (int n = 0; n < m_aiMgrs.Length; n++)
                                        {
                                            m_aiMgrs[n].SetPlayerStartPos();                 // AI StartPos 초기화
                                            m_aiMgrs[n].SetAIPath();                         // AI StartPos 초기화
                                        }
                                        // === AI 초기화 관련 === //
                                    })
-                                   .AppendInterval(2f)
+                                   .AppendInterval(4f)
                                    .OnComplete(() =>
                                    {
                                        // === 게임 시작! === //
@@ -104,7 +104,6 @@ public class InGameManager : MonoBehaviour
                                        PlayAiGame();
                                        // === 게임 시작! === //
 
-                                       m_curGameState = eGameState.Play;            // GameState (Play)
                                    });
     }
 
@@ -138,15 +137,18 @@ public class InGameManager : MonoBehaviour
     public void PlayPlayerGame()
     {
         // === 플레이어 관련 === //
-        m_plyMgr.SetAnim_Push();                        // 플레이어 Push Anim 실행
+        //m_plyMgr.SetAnim_Push();                        // 플레이어 Push Anim 실행
         m_plyMgr.m_isMoving = true;                     // 플레이어 움직임 여부
+        m_plyMgr.m_snowBallMgr.SetSphereCollider(true);
         //m_plyMgr.m_snowBallMgr.RotateSnowBall();        // 스노우볼 굴러가는 함수
         m_plyMgr.m_snowBallMgr.SetSnowBallSize(true);   // 스노우볼 사이즈업 함수
         StartCoroutine(m_plyMgr.PlayerMoving());        // 플레이어 Forward 방향 코루틴
-        // === 플레이어 관련 === //
+                                                        // === 플레이어 관련 === //
 
 
         //m_snowGround.GroundMoving();                 // (★고민중)
+
+        m_curGameState = eGameState.Play;            // GameState (Play)
     }
 
 
@@ -155,8 +157,9 @@ public class InGameManager : MonoBehaviour
         // === AI 관련 === //
         for (int n = 0; n < m_aiMgrs.Length; n++)
         {
-            m_aiMgrs[n].SetAnim_Push();
+            //m_aiMgrs[n].SetAnim_Push();
             m_aiMgrs[n].m_isMoving = true;
+            m_aiMgrs[n].m_snowBallMgr.SetSphereCollider(true);
             //m_aiMgrs[n].m_snowBallMgr.RotateSnowBall();
             m_aiMgrs[n].m_snowBallMgr.SetSnowBallSize(true, false);
             StartCoroutine(m_aiMgrs[n].PlayerMoving());
