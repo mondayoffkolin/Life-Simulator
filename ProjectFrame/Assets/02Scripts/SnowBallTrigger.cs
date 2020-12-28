@@ -6,9 +6,9 @@ using DG.Tweening;
 public class SnowBallTrigger : MonoBehaviour
 {
     [SerializeField] SnowBallManager.eSnowBallSize m_eSnowBallSize = SnowBallManager.eSnowBallSize.None;
-    public Transform m_snowBallTf = null;                     // 내 SnowBall
+    public Transform m_snowBallTf = null;                            // 내 SnowBall
     [SerializeField] PlayerManager m_manager = null;                 // 내 SnowBall 의 플레이어
-    [SerializeField] SnowBallManager m_snowBallMgr = null;        // 내 SnowBallManager 스크립트
+    [SerializeField] SnowBallManager m_snowBallMgr = null;           // 내 SnowBallManager 스크립트
 
 
     private SphereCollider m_snowBallCollider = null;
@@ -16,9 +16,15 @@ public class SnowBallTrigger : MonoBehaviour
 
     private void Start()
     {
-        m_snowBallTf = this.transform.parent.transform;
-
         m_snowBallCollider = this.GetComponent<SphereCollider>();
+
+
+        if(m_snowBallTf == null)
+            m_snowBallTf = this.transform.parent.transform;
+
+
+        if (m_manager == null)
+            this.transform.parent.GetComponent<PlayerManager>();
     }
     
 
@@ -28,7 +34,7 @@ public class SnowBallTrigger : MonoBehaviour
             other.gameObject.layer == LayerMask.NameToLayer("SnowBall_E"))
         {
             // === SnowBall 크기 비교 === //
-            if (m_snowBallTf.transform.localScale.x < other.GetComponent<SnowBallTrigger>().m_snowBallTf.localScale.x) 
+            if (m_snowBallTf.transform.localScale.x < other.transform.parent.localScale.x) 
             {// 상대 SnowBall에 흡수
                 m_manager.m_playerState = ePlayerState.Death;
 

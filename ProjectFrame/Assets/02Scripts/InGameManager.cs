@@ -30,7 +30,6 @@ public class InGameManager : MonoBehaviour
     public static CameraManager m_camMgr = null;
     public static Joystick m_joystick = null;
     public static P_BombArea m_bombArea = null;
-    public static FastZoneTrailManager m_fastZoneTrail = null;
     public static AIManager[] m_aiMgrs = null;
     public static AIPathManager m_aiPathMgr = null;
 
@@ -62,6 +61,19 @@ public class InGameManager : MonoBehaviour
     /// </summary>
     private void GameStartDoTween()
     {
+        m_aiMgrs = FindObjectsOfType<AIManager>();
+        m_aiPathMgr = FindObjectOfType<AIPathManager>();
+
+        // === AI 초기화 관련 === //
+        for (int n = 0; n < m_aiMgrs.Length; n++)
+        {
+            m_aiMgrs[n].SetPlayerStartPos();                                 // AI StartPos 초기화
+            m_aiMgrs[n].m_snowBallMgr.m_fastZoneTrailMgr.SetTrailPooling();  // AI SnowBall 흔적풀링 초기화
+            m_aiMgrs[n].SetAIPath();                                         // AI StartPos 지나갈 자리 초기
+        }
+        // === AI 초기화 관련 === //
+
+
         gameStartSeq = DOTween.Sequence()
                                    .OnStart(() =>
                                    {
@@ -73,6 +85,8 @@ public class InGameManager : MonoBehaviour
                                        // === 메인 Objs인스턴스 찾는 함수 === //
                                        FindMainObjs();
                                        // === 메인 Objs인스턴스 찾는 함수 === //
+
+                                       PlayAiGame();
                                    })
                                    .AppendInterval(1f)
                                    .AppendCallback(() =>
@@ -83,25 +97,28 @@ public class InGameManager : MonoBehaviour
 
 
                                        // === 플레이어 초기화 관련 === //
-                                       m_plyMgr.SetPlayerStartPos();                        // 플레이어 StartPos 초기화
-                                       m_fastZoneTrail.SetTrailPooling();                   // fastzone에서의 이펙트 풀링 초기화
+                                       m_plyMgr.SetPlayerStartPos();                                // 플레이어 StartPos 초기화
+                                       m_plyMgr.m_snowBallMgr.m_fastZoneTrailMgr.SetTrailPooling(); // fastzone에서의 이펙트 풀링 초기화
+                                                                                                    //m_fastZoneTrail.SetTrailPooling();                         // fastzone에서의 이펙트 풀링 초기화
                                        // === 플레이어 초기화 관련 === //
 
 
-                                       // === AI 초기화 관련 === //
-                                       for (int n = 0; n < m_aiMgrs.Length; n++)
-                                       {
-                                           m_aiMgrs[n].SetPlayerStartPos();                 // AI StartPos 초기화
-                                           m_aiMgrs[n].SetAIPath();                         // AI StartPos 초기화
-                                       }
-                                       // === AI 초기화 관련 === //
+                                       //// === AI 초기화 관련 === //
+                                       //for (int n = 0; n < m_aiMgrs.Length; n++)
+                                       //{
+                                       //    m_aiMgrs[n].SetPlayerStartPos();                                 // AI StartPos 초기화
+                                       //    m_aiMgrs[n].m_snowBallMgr.m_fastZoneTrailMgr.SetTrailPooling();  // AI SnowBall 흔적풀링 초기화
+                                       //    m_aiMgrs[n].SetAIPath();                                         // AI StartPos 지나갈 자리 초기
+                                       //}
+                                       //// === AI 초기화 관련 === //
+                                       
+                                       m_curGameState = eGameState.Start;
                                    })
                                    .AppendInterval(4f)
                                    .OnComplete(() =>
                                    {
                                        // === 게임 시작! === //
                                        PlayPlayerGame();
-                                       PlayAiGame();
                                        // === 게임 시작! === //
 
                                    });
@@ -120,31 +137,31 @@ public class InGameManager : MonoBehaviour
         m_camMgr = FindObjectOfType<CameraManager>();
         m_joystick = FindObjectOfType<Joystick>();
         m_bombArea = FindObjectOfType<P_BombArea>();
-        m_fastZoneTrail = FindObjectOfType<FastZoneTrailManager>();
+        // m_fastZoneTrail = FindObjectOfType<FastZoneTrailManager>();
         m_aiMgrs = FindObjectsOfType<AIManager>();
-        m_aiPathMgr = FindObjectOfType<AIPathManager>();
+
 
         m_snowGround = FindObjectOfType<SnowGroundScrolling>();     // (★고민중)
 
         if (m_camMgr != null && m_plyMgr != null && m_snowBallMgr != null &&
-            m_joystick != null && m_snowGround != null && m_bombArea != null &&
-            m_fastZoneTrail != null)
+            m_joystick != null && m_snowGround != null && m_bombArea != null)
+            //&& m_fastZoneTrail != null)
             print("Objs 찾기완료!");
         // === 메인 Obj인스턴스 찾기 === //
     }
 
 
+    /// <summary>
+    /// 플레이어 게임시작 함수
+    /// </summary>
     public void PlayPlayerGame()
     {
         // === 플레이어 관련 === //
-        //m_plyMgr.SetAnim_Push();                        // 플레이어 Push Anim 실행
-        m_plyMgr.m_isMoving = true;                     // 플레이어 움직임 여부
-        m_plyMgr.m_snowBallMgr.SetSphereCollider(true);
-        //m_plyMgr.m_snowBallMgr.RotateSnowBall();        // 스노우볼 굴러가는 함수
-        m_plyMgr.m_snowBallMgr.SetSnowBallSize(true);   // 스노우볼 사이즈업 함수
-        StartCoroutine(m_plyMgr.PlayerMoving());        // 플레이어 Forward 방향 코루틴
-                                                        // === 플레이어 관련 === //
-
+        m_plyMgr.m_isMoving = true;                           // 플레이어 움직임 여부
+        m_plyMgr.m_snowBallMgr.SetSphereCollider(true);       // 스노우볼 콜라이더 켜기
+        m_plyMgr.m_snowBallMgr.SetSnowBallSize(true);         // 스노우볼 사이즈업 함수
+        StartCoroutine(m_plyMgr.PlayerMoving());              // 플레이어 Forward 방향 코루틴
+        // === 플레이어 관련 === //
 
         //m_snowGround.GroundMoving();                 // (★고민중)
 
@@ -152,15 +169,17 @@ public class InGameManager : MonoBehaviour
     }
 
 
+
+    /// <summary>
+    /// AI 게임시작 함
+    /// </summary>
     public void PlayAiGame()
     {
         // === AI 관련 === //
         for (int n = 0; n < m_aiMgrs.Length; n++)
         {
-            //m_aiMgrs[n].SetAnim_Push();
             m_aiMgrs[n].m_isMoving = true;
             m_aiMgrs[n].m_snowBallMgr.SetSphereCollider(true);
-            //m_aiMgrs[n].m_snowBallMgr.RotateSnowBall();
             m_aiMgrs[n].m_snowBallMgr.SetSnowBallSize(true, false);
             StartCoroutine(m_aiMgrs[n].PlayerMoving());
         }

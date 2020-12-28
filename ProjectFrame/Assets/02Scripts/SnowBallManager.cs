@@ -29,14 +29,26 @@ public class SnowBallManager : MonoBehaviour
     [Header("눈덩이 오브젝트")]
     [SerializeField] private GameObject m_snowBallObj = null;                    // 눈덩이 오브젝트
     [SerializeField] SphereCollider m_snowBallCollider = null;                      // 눈덩이 콜라이더
-    public Vector3 m_snowBallIncreaseVec = new Vector3(.8f, .8f, .8f);          // 눈덩이 크지는 크기 벡터
+    [SerializeField] Vector3 m_originSnowBallSizeVec = Vector3.zero;            // 원래 눈덩이 크기
+    [SerializeField] Vector3 m_originSnowBallPositionVec = Vector3.zero;       // 원래 눈덩이 거리
+    public Vector3 m_snowBallIncreaseVec = new Vector3(.1f, .1f, .1f);          // 눈덩이 크지는 크기 벡터
     public Vector3 m_originSnowBallIncreaseVec = Vector3.zero;                // 초기 눈덩이 증가량
     public Transform m_parentTf = null;
 
 
+    [Header("눈덩이 이펙트 관련")]
+    [SerializeField] Transform[] m_snowEffectTf = null;
+    [SerializeField] ParticleSystem[] m_snowTrailEffect = null;
+    public FastZoneTrailManager m_fastZoneTrailMgr = null;                      // 눈덩이 지나간 흔적
+
+
+    [Header("카메라 이펙트 관련")]
+    [SerializeField] ParticleSystem m_camEffect = null;
+
+
     [Header("장애물과 눈덩이 관련")]
     [SerializeField] private Transform[] m_obstaclePosTf = null;
-    [SerializeField] private Transform m_obstacleParentTf = null;                         // 장애물이 눈덩이에 속할 부모Tf
+    [SerializeField] private Transform m_obstacleParentTf = null;              // 장애물이 눈덩이에 속할 부모Tf
     [SerializeField] private CharacterInSnowBall[] m_characterObj = null;
     
 
@@ -52,29 +64,42 @@ public class SnowBallManager : MonoBehaviour
 
         m_tweener = new List<Tweener>();
         m_tweenerD = new List<Tweener>();
+
+
+        if (m_myCharacter == null)
+            m_myCharacter = this.transform.parent.GetComponent<PlayerManager>();
+
+        if (m_parentTf == null)
+            m_parentTf = this.transform.parent;
     }
 
 
     private void Update()
     {
-        //if(InGameManager.uniqueInstance.m_curGameState == InGameManager.eGameState.Play)
         if(m_myCharacter.m_playerState == ePlayerState.Run)
         {
+            // === 스노우볼 사이즈 측정 === //
             switch (m_curSnowBallSize)
             {
                 case eSnowBallSize.One:
                     if (this.transform.localScale.x >= 35)
                     {
+                        m_curSnowBallSize = eSnowBallSize.ThirtyFive;
+
                         if (m_isPlayer == true)
                         {
-                            InGameManager.m_camMgr.SetFollowOffset(true);
-                            InGameManager.m_plyMgr.SetAnimSpeedUp();
+                            InGameManager.m_camMgr.SetFollowOffset(true);           // 카메라 뒤로 줌아웃
+                            InGameManager.m_plyMgr.SetAnimSpeedUp();               // 스피드 업
+                            m_snowBallIncreaseVec = new Vector3(.2f, .2f, .2f);
                         }
                         else
+                        {
+                            float a_increaseNum = Random.Range(.05f, .12f);
+                            m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
                             m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
+                        }
 
-                        m_snowBallIncreaseVec = new Vector3(1f, 1f, 1f);
-                        m_curSnowBallSize = eSnowBallSize.ThirtyFive;
+                        SetSnowBallScale(m_curSnowBallSize);
                         break;
                     }
                     break;
@@ -82,16 +107,22 @@ public class SnowBallManager : MonoBehaviour
                 case eSnowBallSize.ThirtyFive:
                     if (this.transform.localScale.x >= 90)
                     {
+                        m_curSnowBallSize = eSnowBallSize.Ninety;
+
                         if (m_isPlayer == true)
                         {
                             InGameManager.m_camMgr.SetFollowOffset(true);
                             InGameManager.m_plyMgr.SetAnimSpeedUp();
+                            m_snowBallIncreaseVec = new Vector3(.3f, .3f, .3f);
                         }
                         else
+                        {
+                            float a_increaseNum = Random.Range(.1f, .2f);
+                            m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
                             m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
+                        }
 
-                        m_snowBallIncreaseVec = new Vector3(1.4f, 1.4f, 1.4f);
-                        m_curSnowBallSize = eSnowBallSize.Ninety;
+                        SetSnowBallScale(m_curSnowBallSize);
                         break;
                     }
                     break;
@@ -99,16 +130,22 @@ public class SnowBallManager : MonoBehaviour
                 case eSnowBallSize.Ninety:
                     if (this.transform.localScale.x >= 150)
                     {
+                        m_curSnowBallSize = eSnowBallSize.HundredFIf;
+
                         if (m_isPlayer == true)
                         {
                             InGameManager.m_camMgr.SetFollowOffset(true);
                             InGameManager.m_plyMgr.SetAnimSpeedUp();
+                            m_snowBallIncreaseVec = new Vector3(.5f, .5f, .5f);
                         }
                         else
+                        {
+                            float a_increaseNum = Random.Range(.2f, .3f);
+                            m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
                             m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
+                        }
 
-                        m_snowBallIncreaseVec = new Vector3(2f, 2f, 2f);
-                        m_curSnowBallSize = eSnowBallSize.HundredFIf;
+                        SetSnowBallScale(m_curSnowBallSize);
                         break;
                     }
                     break;
@@ -116,21 +153,30 @@ public class SnowBallManager : MonoBehaviour
                 case eSnowBallSize.HundredFIf:
                     if (this.transform.localScale.x > 210)
                     {
+                        m_curSnowBallSize = eSnowBallSize.TwoHdTen;
+
                         if (m_isPlayer == true)
                         {
                             InGameManager.m_camMgr.SetFollowOffset(true);
                             InGameManager.m_plyMgr.SetAnimSpeedUp();
                         }
                         else
+                        {
+                            float a_increaseNum = Random.Range(.3f, .35f);
+                            m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
                             m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
+                        }
 
-                        m_curSnowBallSize = eSnowBallSize.TwoHdTen;
+
+                        SetSnowBallScale(m_curSnowBallSize);
                         break;
                     }
                     break;
                 case eSnowBallSize.TwoHdTen:
                     if (this.transform.localScale.x > 280)
                     {
+                        m_curSnowBallSize = eSnowBallSize.TwoHdEighty;
+
                         if (m_isPlayer == true)
                         {
                             InGameManager.m_camMgr.SetFollowOffset(true);
@@ -139,13 +185,15 @@ public class SnowBallManager : MonoBehaviour
                         else
                             m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
 
-                        m_curSnowBallSize = eSnowBallSize.TwoHdEighty;
+                        SetSnowBallScale(m_curSnowBallSize);
                         break;
                     }
                     break;
                 case eSnowBallSize.TwoHdEighty:
                     if (this.transform.localScale.x > 355)
                     {
+                        m_curSnowBallSize = eSnowBallSize.End;
+
                         if (m_isPlayer == true)
                         {
                             InGameManager.m_camMgr.SetFollowOffset(true);
@@ -154,13 +202,28 @@ public class SnowBallManager : MonoBehaviour
                         else
                             m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
 
-                        m_curSnowBallSize = eSnowBallSize.End;
+                        SetSnowBallScale(m_curSnowBallSize);
                         break;
                     }
                     break;
             }
+            // === 스노우볼 사이즈 측정 === //
 
-            m_snowBallObj.transform.Rotate(Vector3.right * 500 * Time.deltaTime, Space.World);
+
+            // === 스노우볼 x축 회전 === //
+            m_snowBallObj.transform.Rotate(Vector3.right * 500 * Time.deltaTime, Space.Self);
+            // === 스노우볼 x축 회전 === //
+
+
+            // === 스노우볼 흔적 === //
+            m_fastZoneTrailMgr.SetTrailVec();
+            m_fastZoneTrailMgr.DequeueTrailEffect();
+            // === 스노우볼 흔적 === //
+        }
+        else
+        {
+            m_fastZoneTrailMgr.SetTrailVec();
+            SetSnowBallScale(m_curSnowBallSize);
         }
     }
 
@@ -174,13 +237,19 @@ public class SnowBallManager : MonoBehaviour
     {
         if(m_isUp == true)
         {
-            m_myCharacter.SetAnim_Push();                        // 플레이어 Push Anim 실행
+            m_myCharacter.SetAnim_Push();                                   // 플레이어 Push Anim 실행
+            SetSnowBallTrailEffect(true);                                   // Snowball 이펙트 켜기
+            if(m_isPlayer == true)
+                SetCamEffect(true);                                             // 카메라 이펙트 켜기
+
+            //InGameManager.m_fastZoneTrail.m_isTrailOn = true;
+            m_fastZoneTrailMgr.m_isTrailOn = true;
 
             #region 눈덩이 크기 증가 & 카메라 줌아웃
             m_tweener.Add(this.transform.DOScale(this.transform.localScale + m_snowBallIncreaseVec, .1f)
                     .SetEase(Ease.Linear)
                     .SetLoops(-1, LoopType.Incremental));
-            m_tweener.Add(this.transform.DOLocalMove(new Vector3(0, 0, this.transform.localPosition.z + .25f), .1f)
+            m_tweener.Add(this.transform.DOLocalMove(new Vector3(0, 0, this.transform.localPosition.z + .04f), .1f)
                     .SetEase(Ease.Linear)
                     .SetLoops(-1, LoopType.Incremental));
             #endregion
@@ -206,12 +275,12 @@ public class SnowBallManager : MonoBehaviour
                                   {
                                       m_curSnowBallSize = eSnowBallSize.One;
 
-                                      SetSphereCollider(true);
-                                      SetSnowBallSize(true);
-
-                                      m_snowBallIncreaseVec = new Vector3(.8f, .8f, .8f);
-
                                       m_tweenerD.Clear();
+                                      m_snowBallIncreaseVec = new Vector3(.1f, .1f, .1f);
+
+                                      SetSphereCollider(true);          
+                                      SetSnowBallSize(true);
+                                      
                                   }));
                         break;
 
@@ -225,12 +294,11 @@ public class SnowBallManager : MonoBehaviour
                                   {
                                       m_curSnowBallSize = eSnowBallSize.ThirtyFive;
 
+                                      m_tweenerD.Clear();
+                                      m_snowBallIncreaseVec = new Vector3(.2f, .2f, .2f);
+
                                       SetSphereCollider(true);
                                       SetSnowBallSize(true);
-
-                                      m_snowBallIncreaseVec = new Vector3(1f, 1f, 1f);
-
-                                      m_tweenerD.Clear();
                                   }));
                         break;
 
@@ -244,12 +312,11 @@ public class SnowBallManager : MonoBehaviour
                                   {
                                       m_curSnowBallSize = eSnowBallSize.Ninety;
 
+                                      m_tweenerD.Clear();
+                                      m_snowBallIncreaseVec = new Vector3(.3f, .3f, .3f);
+
                                       SetSphereCollider(true);
                                       SetSnowBallSize(true);
-
-                                      m_snowBallIncreaseVec = new Vector3(1.4f, 1.4f, 1.4f);
-
-                                      m_tweenerD.Clear();
                                   }));
                         break;
                 }
@@ -272,13 +339,13 @@ public class SnowBallManager : MonoBehaviour
                                   {
                                       m_curSnowBallSize = eSnowBallSize.One;
 
-                                      SetSphereCollider(true);
-                                      SetSnowBallSize(true, false);
-
-                                      float a_increaseNum = Random.Range(.4f, 8f);
+                                      float a_increaseNum = Random.Range(.05f, .12f);
                                       m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
 
                                       m_tweenerD.Clear();
+
+                                      SetSphereCollider(true);
+                                      SetSnowBallSize(true, false);
                                   }));
 
                         break;
@@ -290,13 +357,13 @@ public class SnowBallManager : MonoBehaviour
                                   {
                                       m_curSnowBallSize = eSnowBallSize.ThirtyFive;
 
-                                      SetSphereCollider(true);
-                                      SetSnowBallSize(true, false);
-
-                                      float a_increaseNum = Random.Range(.7f, 1.1f);
+                                      float a_increaseNum = Random.Range(.1f, .2f);
                                       m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
 
                                       m_tweenerD.Clear();
+
+                                      SetSphereCollider(true);
+                                      SetSnowBallSize(true, false);
                                   }));
 
                         break;
@@ -308,13 +375,13 @@ public class SnowBallManager : MonoBehaviour
                                   {
                                       m_curSnowBallSize = eSnowBallSize.Ninety;
 
-                                      SetSphereCollider(true);
-                                      SetSnowBallSize(true, false);
-
-                                      float a_increaseNum = Random.Range(1.2f, 1.5f);
+                                      float a_increaseNum = Random.Range(.2f, .3f);
                                       m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
 
                                       m_tweenerD.Clear();
+
+                                      SetSphereCollider(true);
+                                      SetSnowBallSize(true, false);
                                   }));
                         break;
                 }
@@ -346,9 +413,8 @@ public class SnowBallManager : MonoBehaviour
         }
         else
         {
-            InGameManager.m_fastZoneTrail.m_isTrailOn = false;
+            //InGameManager.m_fastZoneTrail.m_isTrailOn = false;
 
-            StopRotateSnowBall();
             a_obj.SetAnim_GameOver();
         }
     }
@@ -370,7 +436,6 @@ public class SnowBallManager : MonoBehaviour
         }
         else
         {
-            StopRotateSnowBall();
             a_obj.SetAiAnim_GameOver();
         }
     }
@@ -398,8 +463,8 @@ public class SnowBallManager : MonoBehaviour
 
         m_snowBallIncreaseVec = m_originSnowBallIncreaseVec;
 
-        this.transform.localScale = new Vector3(1, 1, 1);
-        this.transform.localPosition = new Vector3(0, 0, 8.8f);
+        this.transform.localScale = m_originSnowBallSizeVec;
+        this.transform.localPosition = m_originSnowBallPositionVec;
     }
 
 
@@ -412,6 +477,7 @@ public class SnowBallManager : MonoBehaviour
         a_obstacle.transform.SetParent(m_obstacleParentTf.transform);
         a_obstacle.transform.position = m_obstaclePosTf[a_rnd].position;
         a_obstacle.transform.rotation = m_obstaclePosTf[a_rnd].rotation;
+
 
         switch(a_obsLevel)
         {
@@ -459,6 +525,63 @@ public class SnowBallManager : MonoBehaviour
             }
         }
         // === 스노우볼에 붙혀있던 Character 폭발 부분 === //
+    }
+    #endregion
+
+
+    #region 눈덩이 이펙트 관련
+    public void SetSnowBallScale(eSnowBallSize a_snowBallSize)
+    {
+        switch(a_snowBallSize)
+        {
+            case eSnowBallSize.One:
+                for (int n = 0; n < m_snowEffectTf.Length; n++)
+                    m_snowEffectTf[n].localScale = new Vector3(1.5f, 1.5f, 1.5f);
+                break;
+
+            case eSnowBallSize.ThirtyFive:
+                for (int n = 0; n < m_snowEffectTf.Length; n++)
+                    m_snowEffectTf[n].localScale = new Vector3(3, 3, 3);
+                break;
+
+            case eSnowBallSize.Ninety:
+                for (int n = 0; n < m_snowEffectTf.Length; n++)
+                    m_snowEffectTf[n].localScale = new Vector3(6, 6, 6);
+                break;
+
+            case eSnowBallSize.HundredFIf:
+            case eSnowBallSize.TwoHdTen:
+            case eSnowBallSize.TwoHdEighty:
+            case eSnowBallSize.ThreeHdFIfFive:
+            case eSnowBallSize.End:
+                for (int n = 0; n < m_snowEffectTf.Length; n++)
+                    m_snowEffectTf[n].localScale = new Vector3(10, 10, 10);
+                break;
+        }
+    }
+
+
+    /// <summary>
+    /// SnowBall 좌/우에 생성되는 이펙트 on/off 여부
+    /// </summary>
+    /// <param name="a_isStart"></param>
+    public void SetSnowBallTrailEffect(bool a_isStart)
+    {
+        if (a_isStart == true)
+            for (int n = 0; n < m_snowTrailEffect.Length; n++)
+                m_snowTrailEffect[n].Play();
+        else
+            for (int n = 0; n < m_snowTrailEffect.Length; n++)
+                m_snowTrailEffect[n].Stop();
+    }
+
+
+    public void SetCamEffect(bool a_isStart)
+    {
+        if (a_isStart == true)
+                m_camEffect.Play();
+        else
+                m_camEffect.Stop();
     }
     #endregion
 

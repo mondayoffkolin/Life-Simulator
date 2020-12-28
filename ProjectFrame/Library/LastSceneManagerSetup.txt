@@ -3,11 +3,8 @@ sceneSetups:
   isLoaded: 1
   isActive: 1
   isSubScene: 0
-- path: Assets/AlignedGames/Polygonal Foliage Asset Package/Scenes/Demonstration1.unity
-  isLoaded: 0
-  isActive: 0
-  isSubScene: 0
-- path: Assets/09Assets/2DxFX/Examples/Scenes/Example_All.unity
+- path: Assets/Amazing Assets/Curved World/Example Scenes/Bend - Classic Runner (X
+    Positive).unity
   isLoaded: 0
   isActive: 0
   isSubScene: 0

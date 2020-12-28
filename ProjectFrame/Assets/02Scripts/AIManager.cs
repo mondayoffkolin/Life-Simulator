@@ -18,16 +18,17 @@ public class AIManager : PlayerManager
     [Header("Ai Level")]
     [SerializeField] private eLevel m_level = eLevel.None;
 
-    [Header("Ai Path")]
-    [SerializeField] private List<Transform> m_aiPathTf;
 
-    Sequence test;
+    [Header("Ai Path")]
+    [SerializeField] private List<Vector3> m_aiPathTf;
+
+
 
     protected override void Awake()
     {
         base.Awake();
 
-        m_aiPathTf = new List<Transform>();
+        m_aiPathTf = new List<Vector3>();
     }
 
 
@@ -103,17 +104,20 @@ public class AIManager : PlayerManager
     public void SetAiAnim_GameOver()
     {
         m_animCtrl.ResetTrigger("Push");
-        m_animCtrl.SetTrigger("GameOver");                                // 플레이어 Die 애니메이션 실행
+        m_animCtrl.SetTrigger("GameOver");                          // 플레이어 Die 애니메이션 실행
 
 
-        m_snowBallMeshRdr.enabled = false;                                // 눈덩이 메쉬렌더러 끄기
-        //m_characterMeshRdr.enabled = false;                          // 캐릭터 렌더러 끄기
+        m_snowBallMeshRdr.enabled = false;                          // 눈덩이 메쉬렌더러 끄기
+        //m_characterMeshRdr.enabled = false;                       // 캐릭터 렌더러 끄기
 
 
-        m_splashEffect.SetActive(false);                                  // 플레이어 달리는 이펙트 끄기
+        m_splashEffect.SetActive(false);                            // 플레이어 달리는 이펙트 끄기
+
+        m_snowBallMgr.StopRotateSnowBall();                         // 스노우볼 회전 멈추기
+        StopPlayerMoving();                                         // 플레이어 움직임 Stop
 
 
-        StopPlayerMoving();                                               // 플레이어 움직임 Stop
+        m_snowBallMgr.SetSnowBallTrailEffect(false);                // 눈덩이 이펙트 끄기
 
 
         playerGameOverSeq = DOTween.Sequence()
@@ -191,7 +195,7 @@ public class AIManager : PlayerManager
         m_pathCount = 0;
 
         // === Ai Path 설정 === //
-        Transform[] a_aiPathTf;
+        Vector3[] a_aiPathTf;
 
         a_aiPathTf = InGameManager.m_aiPathMgr.SetPathRoot(m_level);
 
@@ -214,14 +218,15 @@ public class AIManager : PlayerManager
         if (m_isMoving == true)
         {
             // === 지경 Path로 이동 === //
-            float a_dis = (this.transform.position - m_aiPathTf[m_pathCount].position).sqrMagnitude;
+            float a_dis = (this.transform.position - m_aiPathTf[m_pathCount]).sqrMagnitude;
             if (a_dis < 150f)
                 m_pathCount += 1;
             else
             {
                 this.transform.Translate(Vector3.forward * m_playerMovSpd, Space.Self);
-                this.transform.DOLookAt(m_aiPathTf[m_pathCount].position, 1.5f);
+                this.transform.DOLookAt(m_aiPathTf[m_pathCount], 1.5f);
             }
+            //this.transform.Translate(Vector3.forward * m_playerMovSpd, Space.Self);
             // === 지경 Path로 이동 === //
 
             yield return new WaitForSeconds(0.01f);

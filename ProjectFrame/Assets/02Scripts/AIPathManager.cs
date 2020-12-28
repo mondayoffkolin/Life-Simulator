@@ -4,33 +4,35 @@ using UnityEngine;
 
 public class AIPathManager : MonoBehaviour
 {
-    [Header("플레이하고 있는 스테이지 경로 개수")]
-    [SerializeField] private Transform[] m_pathRoots = null;
+    //[Header("플레이하고 있는 스테이지 경로 개수")]
+    //[SerializeField] private Transform[] m_pathRoots = null;
 
 
-    [Header("특정 경로 오브젝트의 자식개수만큼의 Tf")]
-    [SerializeField] private Transform[] m_childPathRoot = null;
+    //[Header("특정 경로 오브젝트의 자식개수만큼의 Tf")]
+    //[SerializeField] private Transform[] m_childPathRoot = null;
 
 
     /// <summary>
     /// (GameStage = Ready/Play) Ai가 지나갈 Path 설정 
     /// </summary>
-    public Transform[] SetPathRoot(eLevel a_aiLevel)
+    public Vector3[] SetPathRoot(eLevel a_aiLevel)
     {
+        Transform[] m_pathRoots = null;
         m_pathRoots = new Transform[this.transform.childCount];                 // Path 개수만큼 할당
 
         for (int n = 0; n < m_pathRoots.Length; n++)
             m_pathRoots[n] = this.transform.GetChild(n).transform;                // Path 대입
 
 
+        Vector3[] m_childPathRoot = null;
         int a_rndPath = Random.Range(0, m_pathRoots.Length);
-        m_childPathRoot = new Transform[m_pathRoots[a_rndPath].childCount];     // 특정 Path 지정해서 자식들 대입
+        m_childPathRoot = new Vector3[m_pathRoots[a_rndPath].childCount];     // 특정 Path 지정해서 자식들 대입
 
 
         for (int n = 0; n < m_childPathRoot.Length; n++)
         {
-            m_childPathRoot[n] = m_pathRoots[a_rndPath].GetChild(n);
-            m_childPathRoot[n].position += FixPathVec(a_aiLevel);
+            m_childPathRoot[n] = m_pathRoots[a_rndPath].GetChild(n).position;
+            m_childPathRoot[n] += FixPathVec(a_aiLevel);
         }
 
 
@@ -49,17 +51,20 @@ public class AIPathManager : MonoBehaviour
         switch (a_aiLevel)
         {
             case eLevel.Low:        // AI 난이도 하
-                a_x = Random.Range(-40, 40);
+                a_x = Random.Range(-50, 50);
                 break;
 
             case eLevel.Middle:        // AI 난이도 하
-                a_x = Random.Range(-15, 15);
+                a_x = Random.Range(-80, 80);
                 break;
 
             case eLevel.High:        // AI 난이도 하
-                a_x = 0;
+                //a_x = 0;
+                a_x = Random.Range(-120, 120);
                 break;
-        }    
+        }
+
+
 
         return new Vector3(a_x, 0, 0);
     }

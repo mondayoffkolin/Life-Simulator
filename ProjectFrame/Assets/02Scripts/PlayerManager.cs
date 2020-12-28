@@ -38,9 +38,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] protected VisualEffect m_playerRunSplashEffect = null;         // 플레이어 달릴때 이펙트(조절용)
     [SerializeField] private ParticleSystem m_camSplashEffect = null;               // 플레이어 달릴때 카메라에 나올 이펙트
 
-
     [SerializeField] protected ParticleSystem m_crashHitEffect = null;              // 일반(장애물)에 부딪힐때 나오는 이펙트
     [SerializeField] protected ParticleSystem m_crashRockEffect = null;             // 바위(장애물)에 부딪힐때 나오는 이펙 
+
 
 
     [Header("클리어시 Tf")]
@@ -132,6 +132,8 @@ public class PlayerManager : MonoBehaviour
     {
         InGameManager.uniqueInstance.m_curGameState = InGameManager.eGameState.Clear;
 
+        m_snowBallMgr.SetSnowBallTrailEffect(false);                    // Snowball 이펙트 끄기
+
         // === ClearPos로 이동 === //
         playerClearSeq = DOTween.Sequence()
                                 .Append(this.transform.DOMove(m_clearTf.position, 1.5f))
@@ -159,19 +161,22 @@ public class PlayerManager : MonoBehaviour
     {
         //InGameManager.uniqueInstance.m_curGameState = InGameManager.eGameState.End;
         m_animCtrl.ResetTrigger("Push");
-        m_animCtrl.SetTrigger("GameOver");                                // 플레이어 Die 애니메이션 실행
+        m_animCtrl.SetTrigger("GameOver");                        // 플레이어 Die 애니메이션 실행
 
 
-        m_snowBallMeshRdr.enabled = false;                                  // 눈덩이 메쉬렌더러 끄기
-        //m_characterMeshRdr.enabled = false;                               // 캐릭터 렌더러 끄기
-        m_splashEffect.SetActive(false);                                   // 플레이어 달리는 이펙트 끄기
-        m_camSplashEffect.Stop();                                         // 카메라에 붙어있는 이펙트 끄기
+        m_snowBallMeshRdr.enabled = false;                        // 눈덩이 메쉬렌더러 끄기
+        m_splashEffect.SetActive(false);                          // 플레이어 달리는 이펙트 끄기
+        m_camSplashEffect.Stop();                                 // 카메라에 붙어있는 이펙트 끄기
 
 
+        m_snowBallMgr.StopRotateSnowBall();                       // 눈덩이 회전 끄기
+        StopPlayerMoving();                                       // 플레이어 움직임 Stop
 
-        StopPlayerMoving();                                               // 플레이어 움직임 Stop
 
-        //StartCoroutine(testt());
+        m_snowBallMgr.SetSnowBallTrailEffect(false);              // 눈덩이 이펙트 끄기
+        m_snowBallMgr.SetCamEffect(false);                        // 카메라 이펙트 끄기
+
+
         playerGameOverSeq = DOTween.Sequence()
                                    .AppendInterval(2.5f)
                                    //.Append(Camera.main.transform.DOLocalMove(new Vector3(0, 20f, -36f), 1f).SetEase(Ease.Linear))
@@ -185,10 +190,10 @@ public class PlayerManager : MonoBehaviour
                                    {
                                        this.transform.DOKill();
 
-                                       SetPlayerToStartPos();                                                // 플레이어 초기 시작 위치로
+                                       SetPlayerToStartPos();                                       // 플레이어 초기 시작 위치로
                                        SetAnim_Idle();
 
-                                       m_snowBallMgr.SetLocalScale();                                   // 스노우볼 크기 초기화
+                                       m_snowBallMgr.SetLocalScale();                               // 스노우볼 크기 초기화
                                        m_snowBallMeshRdr.enabled = true;                            // 스노우볼 렌더링 켜기
                                        m_characterMeshRdr.enabled = true;                           // 캐릭터 렌더러 끄기
                                    })
@@ -224,14 +229,14 @@ public class PlayerManager : MonoBehaviour
                                    //.AppendInterval(1f)
                                    .AppendCallback(() =>
                                    {
-                                       InGameManager.m_camMgr.SetCamParent();           // 카메라 오브젝트 초기부모 오브젝트로
+                                       InGameManager.m_camMgr.SetCamParent();         // 카메라 오브젝트 초기부모 오브젝트로
                                    })
                                    .AppendInterval(1f)
                                    .AppendCallback(() =>
                                    {
-                                       SetPlayerToStartPos();                                  // 플레이어 초기 시작 위치로
+                                       SetPlayerToStartPos();                         // 플레이어 초기 시작 위치로
 
-                                       m_snowBallMgr.SetLocalScale();                     // 스노우볼 크기 초기화
+                                       m_snowBallMgr.SetLocalScale();                 // 스노우볼 크기 초기화
                                        m_snowBallMeshRdr.enabled = true;              // 스노우볼 렌더링 켜기
                                        m_characterMeshRdr.enabled = true;             // 스노우볼 렌더링 켜기
                                    })
@@ -314,7 +319,7 @@ public class PlayerManager : MonoBehaviour
                 playerFastSeq = DOTween.Sequence()
                                        .AppendCallback(() =>
                                        {
-                                           InGameManager.m_fastZoneTrail.m_isTrailOn = true;
+                                           //InGameManager.m_fastZoneTrail.m_isTrailOn = true;
 
                                            if(m_camSplashEffect != null)
                                                m_camSplashEffect.Play();
@@ -325,7 +330,7 @@ public class PlayerManager : MonoBehaviour
                                        .AppendInterval(2f)
                                        .OnComplete(() =>
                                        {
-                                           InGameManager.m_fastZoneTrail.m_isTrailOn = false;
+                                           //InGameManager.m_fastZoneTrail.m_isTrailOn = false;
 
                                            if(m_camSplashEffect != null)
                                                m_camSplashEffect.Stop();

@@ -16,7 +16,7 @@ public class CameraManager : MonoBehaviour
     public float m_rotationSpeed = 8;                             // (GameState = Play)터치시 플레이어 회전 스피드.
     [SerializeField] private float m_originRotationSpeed = 5;                             // (GameState = Play)터치시 플레이어 회전 스피드.
     private Vector3 Gap = Vector3.zero;                            // (GameState = Play)회전 축적 값.
-    private Vector3 m_followOffset = new Vector3(0, 60, -90);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
+    private Vector3 m_followOffset = new Vector3(0, 100, -90);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
 
 
 
@@ -92,11 +92,11 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     public void CamToPlayerProduction(bool a_gameStart = false)
     {
-        //Sequence camPdSeq;
-
         m_camStartPosTf = GameObject.FindGameObjectWithTag("CameraStartPos").transform;
 
+
         m_rotationSpeed = m_originRotationSpeed;
+
 
         this.transform.DOMove(m_camStartPosTf.position, 1f);
         this.transform.DOLocalRotate(m_camStartPosTf.eulerAngles, 1f)
@@ -110,24 +110,6 @@ public class CameraManager : MonoBehaviour
                                                         InGameManager.uniqueInstance.PlayPlayerGame();
                                                 });
                           });
-
-        //camPdSeq = DOTween.Sequence()
-        //                  .OnStart(() =>
-        //                  {
-        //                      m_rotationSpeed = m_originRotationSpeed;
-        //                  })
-        //                  .Append(this.transform.DOMove(m_camStartPosTf.position, 1f))
-        //                  .Join(this.transform.DOLocalRotate(m_camStartPosTf.eulerAngles, 1f))
-        //                  .Append(this.transform.DOLookAt(m_lookPosTf.position, .5f))
-        //                  .AppendCallback(() =>
-        //                  {
-        //                      this.transform.SetParent(m_playerTf.transform);
-        //                  })
-        //                  .AppendInterval(1.5f)
-        //                  .OnComplete(() =>
-        //                  {
-        //                      InGameManager.uniqueInstance.PlayPlayerGame();
-        //                  });
     }
 
     
@@ -157,7 +139,7 @@ public class CameraManager : MonoBehaviour
 
 
             // === 캐릭터 회전 감도 === //
-            m_rotationSpeed -= 1.5f;
+            m_rotationSpeed -= 1f;
             // === 캐릭터 회전 감도 === //
         }
         else
@@ -172,7 +154,7 @@ public class CameraManager : MonoBehaviour
 
 
             // === 캐릭터 회전 감도 === //
-            m_rotationSpeed += 1.5f;
+            m_rotationSpeed += 1f;
             // === 캐릭터 회전 감도 === //
         }
     }

@@ -9894,6 +9894,7 @@ MonoBehaviour:
   axis: 1
   moveDirection: {x: -1, y: 0, z: 0}
   movingSpeed: 30
+  chunkSize: 60
 --- !u!4 &1439108164
 Transform:
   m_ObjectHideFlags: 0

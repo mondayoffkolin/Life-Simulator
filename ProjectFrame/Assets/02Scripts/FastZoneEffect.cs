@@ -21,6 +21,6 @@ public class FastZoneEffect : MonoBehaviour
 
     private void OnDisable()
     {
-        InGameManager.m_fastZoneTrail.EnqueueTrailEffect(this.gameObject);
+       // InGameManager.m_fastZoneTrail.EnqueueTrailEffect(this.gameObject);
     }
 }

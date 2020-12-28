@@ -11,7 +11,7 @@ Shader "Amazing Assets/Curved World/Mobile/Particles/Additive"
 {
     Properties 
     {
-        [HideInInspector][CurvedWorldBendSettings]	  _CurvedWorldBendSettings("0|1", Vector) = (0, 0, 0, 0)
+        [HideInInspector][CurvedWorldBendSettings]	  _CurvedWorldBendSettings("0,10|1,32", Vector) = (0, 0, 0, 0)
 
         _MainTex ("Particle Texture", 2D) = "white" { }
     }
@@ -34,8 +34,8 @@ Shader "Amazing Assets/Curved World/Mobile/Particles/Additive"
             #define USING_FOG (defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2))
 
 
-#define CURVEDWORLD_BEND_TYPE_CLASSICRUNNER_X_POSITIVE
-#define CURVEDWORLD_BEND_ID_1
+#pragma shader_feature_local CURVEDWORLD_BEND_TYPE_CLASSICRUNNER_X_POSITIVE CURVEDWORLD_BEND_TYPE_CYLINDRICALROLLOFF_Z
+#pragma shader_feature_local CURVEDWORLD_BEND_ID_1 CURVEDWORLD_BEND_ID_32
 #pragma shader_feature_local CURVEDWORLD_DISABLED_ON
 #include "../../Core/CurvedWorldTransform.cginc" 
 
@@ -142,8 +142,8 @@ Shader "Amazing Assets/Curved World/Mobile/Particles/Additive"
             #pragma fragment fragScenePickingPass
 
 
-#define CURVEDWORLD_BEND_TYPE_CLASSICRUNNER_X_POSITIVE
-#define CURVEDWORLD_BEND_ID_1
+#pragma shader_feature_local CURVEDWORLD_BEND_TYPE_CLASSICRUNNER_X_POSITIVE CURVEDWORLD_BEND_TYPE_CYLINDRICALROLLOFF_Z
+#pragma shader_feature_local CURVEDWORLD_BEND_ID_1 CURVEDWORLD_BEND_ID_32
 #pragma shader_feature_local CURVEDWORLD_DISABLED_ON
 
 
@@ -175,8 +175,8 @@ Shader "Amazing Assets/Curved World/Mobile/Particles/Additive"
             #pragma fragment fragSceneHighlightPass
 
 
-#define CURVEDWORLD_BEND_TYPE_CLASSICRUNNER_X_POSITIVE
-#define CURVEDWORLD_BEND_ID_1
+#pragma shader_feature_local CURVEDWORLD_BEND_TYPE_CLASSICRUNNER_X_POSITIVE CURVEDWORLD_BEND_TYPE_CYLINDRICALROLLOFF_Z
+#pragma shader_feature_local CURVEDWORLD_BEND_ID_1 CURVEDWORLD_BEND_ID_32
 #pragma shader_feature_local CURVEDWORLD_DISABLED_ON
 
 
