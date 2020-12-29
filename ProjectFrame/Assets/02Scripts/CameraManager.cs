@@ -11,12 +11,15 @@ public class CameraManager : MonoBehaviour
     [SerializeField] Transform m_lookPosTf = null;                // (GameState = Start)카메라가 이동중 바라볼 Tf
     [SerializeField] Transform m_originParentTf = null;
 
+    [Header("카메라 블러")]
+    [SerializeField] Kino.Motion m_motionBlur = null;
+
 
     public Quaternion TargetRotation;                              // (GameState = Play)최종적으로 축적된 Gap이 이 변수에 저장됨.
     public float m_rotationSpeed = 8;                             // (GameState = Play)터치시 플레이어 회전 스피드.
     [SerializeField] private float m_originRotationSpeed = 5;                             // (GameState = Play)터치시 플레이어 회전 스피드.
     private Vector3 Gap = Vector3.zero;                            // (GameState = Play)회전 축적 값.
-    private Vector3 m_followOffset = new Vector3(0, 100, -90);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
+    private Vector3 m_followOffset = new Vector3(0, 75, -90);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
 
 
 
@@ -92,24 +95,27 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     public void CamToPlayerProduction(bool a_gameStart = false)
     {
-        m_camStartPosTf = GameObject.FindGameObjectWithTag("CameraStartPos").transform;
+        //m_camStartPosTf = GameObject.FindGameObjectWithTag("CameraStartPos").transform;
 
 
         m_rotationSpeed = m_originRotationSpeed;
 
 
-        this.transform.DOMove(m_camStartPosTf.position, 1f);
-        this.transform.DOLocalRotate(m_camStartPosTf.eulerAngles, 1f)
-                          .OnComplete(() =>
-                          {
-                              this.transform.SetParent(m_playerTf.transform);
-                              this.transform.DOLookAt(m_lookPosTf.position, .5f).SetDelay(1.5f)
-                                                .OnComplete(() =>
-                                                {
-                                                    if(a_gameStart == false)
-                                                        InGameManager.uniqueInstance.PlayPlayerGame();
-                                                });
-                          });
+        if (a_gameStart == false)
+            InGameManager.uniqueInstance.PlayPlayerGame();
+
+        //this.transform.DOMove(m_camStartPosTf.position, 1f);
+        //this.transform.DOLocalRotate(m_camStartPosTf.eulerAngles, 1f)
+        //                  .OnComplete(() =>
+        //                  {
+        //                      this.transform.SetParent(m_playerTf.transform);
+        //                      this.transform.DOLookAt(m_lookPosTf.position, .5f).SetDelay(1.5f)
+        //                                        .OnComplete(() =>
+        //                                        {
+        //                                            if(a_gameStart == false)
+        //                                                InGameManager.uniqueInstance.PlayPlayerGame();
+        //                                        });
+        //                  });
     }
 
     
@@ -133,7 +139,7 @@ public class CameraManager : MonoBehaviour
             Vector3  a_followOffset = this.transform.localPosition + m_followOffset;
             // print("Cam Pos : " + a_followOffset);
 
-            this.transform.DOLocalMove(a_followOffset, .6f)
+            this.transform.DOLocalMove(a_followOffset, 1f)
                           .SetEase(Ease.InQuad);
             // === 카메라 줌아웃 === //
 
@@ -148,7 +154,7 @@ public class CameraManager : MonoBehaviour
             Vector3 a_followOffset = this.transform.localPosition - m_followOffset;
             //print("Cam Pos : " + a_followOffset);
 
-            this.transform.DOLocalMove(a_followOffset, .6f)
+            this.transform.DOLocalMove(a_followOffset, 1f)
                           .SetEase(Ease.InQuad);
             // === 카메라 줌인 === //
 
@@ -158,5 +164,49 @@ public class CameraManager : MonoBehaviour
             // === 캐릭터 회전 감도 === //
         }
     }
-    
+
+
+    /// <summary>
+    /// 부스터시 카메라 모션 블러 처리 함수
+    /// </summary>
+    /// <param name="a_isStart"></param>
+    public void SetMotionBlur(bool a_isStart)
+    {
+        if(a_isStart == true)
+        {
+            m_motionBlur.enabled = true;
+            StartCoroutine(SetInActiveMotionBlur(true));
+        }
+        else
+        {
+            StartCoroutine(SetInActiveMotionBlur(false));
+        }
+    }
+    WaitForSeconds m_delayTime = new WaitForSeconds(0.001f);
+    WaitForSeconds m_delayTime2 = new WaitForSeconds(2f);
+    private IEnumerator SetInActiveMotionBlur(bool a_isStart)
+    {
+        for(float n = 0; n < 1; n += 0.1f)
+        {
+            if(a_isStart == true)
+            {
+                m_motionBlur.shutterAngle += 36f;
+                m_motionBlur.frameBlending += 0.05f;
+            }
+            else
+            {
+                m_motionBlur.shutterAngle -= 36f;
+                m_motionBlur.frameBlending -= 0.05f;
+            }
+
+            yield return m_delayTime;
+        }
+
+
+        if (a_isStart == false)
+        {
+            yield return m_delayTime2;
+            m_motionBlur.enabled = false;
+        }
+    }
 }

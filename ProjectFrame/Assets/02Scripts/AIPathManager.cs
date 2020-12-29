@@ -51,16 +51,16 @@ public class AIPathManager : MonoBehaviour
         switch (a_aiLevel)
         {
             case eLevel.Low:        // AI 난이도 하
-                a_x = Random.Range(-50, 50);
+                a_x = Random.Range(-250, 250);
                 break;
 
             case eLevel.Middle:        // AI 난이도 하
-                a_x = Random.Range(-80, 80);
+                a_x = Random.Range(-400, 400);
                 break;
 
             case eLevel.High:        // AI 난이도 하
                 //a_x = 0;
-                a_x = Random.Range(-120, 120);
+                a_x = Random.Range(-600, 600);
                 break;
         }
 

@@ -53,7 +53,15 @@ public class AIManager : PlayerManager
     /// </summary>
     protected override void SetPlayerToStartPos()
     {
-        base.SetPlayerToStartPos();
+        //base.SetPlayerToStartPos();
+
+
+        this.transform.position = InGameManager.m_plyMgr.transform.position - new Vector3(0, 0, 100);
+        this.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+        //m_animCtrl.SetTrigger("Idle");
+
+        m_playerState = ePlayerState.Idle;
     }
     #endregion
 
@@ -85,7 +93,6 @@ public class AIManager : PlayerManager
                                     m_playerState = ePlayerState.Happy;
 
                                     m_animCtrl.SetTrigger("Clear");
-                                    m_splashEffect.SetActive(false);
 
                                     // === 눈덩이 Player Obj에서 떼어낸 후 => 굴러가게 === //
                                     m_snowBallObj.transform.SetParent(m_playerParentTf.transform);
@@ -111,8 +118,6 @@ public class AIManager : PlayerManager
         //m_characterMeshRdr.enabled = false;                       // 캐릭터 렌더러 끄기
 
 
-        m_splashEffect.SetActive(false);                            // 플레이어 달리는 이펙트 끄기
-
         m_snowBallMgr.StopRotateSnowBall();                         // 스노우볼 회전 멈추기
         StopPlayerMoving();                                         // 플레이어 움직임 Stop
 
@@ -121,20 +126,20 @@ public class AIManager : PlayerManager
 
 
         playerGameOverSeq = DOTween.Sequence()
-                       .AppendInterval(2.5f)
+                       .AppendInterval(1.5f)
                        .AppendCallback(() =>
                        {
                            this.transform.DOKill();
 
                            SetAnim_Idle();
                            SetPlayerToStartPos();                         // 플레이어 초기 시작 위치로
-                           SetAIPath();                                   // 경로 다시설정
+                           SetAIPath();                                 // 경로 다시설정
                            
-                           m_snowBallMgr.SetLocalScale();                 // 스노우볼 크기 초기화
+                           //m_snowBallMgr.SetLocalScale();                 // 스노우볼 크기 초기화
                            m_snowBallMeshRdr.enabled = true;              // 스노우볼 렌더링 켜기
                            m_characterMeshRdr.enabled = true;             // 캐릭터 렌더러 끄기
                        })
-                       .AppendInterval(3f)
+                       .AppendInterval(2f)
                        .OnComplete(() =>
                        {
                            SetAnim_Push();                                  // 애니메이션 Push 변경
@@ -153,8 +158,6 @@ public class AIManager : PlayerManager
         m_snowBallMeshRdr.enabled = false;                                 // 스노우볼 렌더링 끄기
         m_characterMeshRdr.enabled = false;                                // 캐릭터 렌더러 끄기
 
-
-        m_splashEffect.SetActive(false);                                   // 플레이어 달리는 이펙트 끄기
 
 
         StopPlayerMoving();                                               // 플레이어 움직임 Stop
@@ -192,7 +195,7 @@ public class AIManager : PlayerManager
     public void SetAIPath()
     {
         m_aiPathTf.Clear();
-        m_pathCount = 0;
+        //m_pathCount = 0;
 
         // === Ai Path 설정 === //
         Vector3[] a_aiPathTf;
@@ -240,9 +243,15 @@ public class AIManager : PlayerManager
     /// </summary>
     public override void StopPlayerMoving()
     {
-        base.StopPlayerMoving();
+        //base.StopPlayerMoving();
+        m_snowBallMeshRdr.enabled = false;                                 // 스노우볼 렌더링 끄기
 
-        m_snowBallMeshRdr.enabled = false;                                  // 눈덩이 메쉬렌더러 끄기
+        m_snowBallMgr.ResetTweener();
+        m_snowBallMgr.SetSphereCollider(false);
+
+        m_isMoving = false;
+        m_playerRigid.isKinematic = true;
+        StopCoroutine(PlayerMoving());              // 플레이어 움직임 중단
     }
 
     /// <summary>
@@ -281,13 +290,11 @@ public class AIManager : PlayerManager
                 playerFastSeq = DOTween.Sequence()
                                        .AppendCallback(() =>
                                        {
-                                           m_playerRunSplashEffect.SetFloat("Speed", 70);
                                            m_playerMovSpd += 1;
                                        })
                                        .AppendInterval(2f)
                                        .OnComplete(() =>
                                        {
-                                           m_playerRunSplashEffect.SetFloat("Speed", 18);
                                            m_playerMovSpd -= 1;
                                        });
             }

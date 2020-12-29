@@ -23,7 +23,7 @@ public class PlayerManager : MonoBehaviour
     [Header("플레이어 스탯")]
     public float m_playerMovSpd = 1f;                                               // 플레이어 움직임 속도
     [SerializeField] protected float m_originPlayerMovSpd = 1f;                     // 플레이어 움직임 속도
-    [SerializeField] protected SkinnedMeshRenderer m_characterMeshRdr = null;              // 플레이어 렌더
+    [SerializeField] protected SkinnedMeshRenderer m_characterMeshRdr = null;       // 플레이어 렌더
 
 
     [Header("스노우볼 Obj")]
@@ -34,13 +34,12 @@ public class PlayerManager : MonoBehaviour
 
 
     [Header("플레이어 이펙트")]
-    [SerializeField] protected GameObject m_splashEffect = null;                    //  플레이어 달릴때 이펙트
-    [SerializeField] protected VisualEffect m_playerRunSplashEffect = null;         // 플레이어 달릴때 이펙트(조절용)
+    [SerializeField] private ParticleSystem m_playerRunSplashEffect = null;         // 플레이어 달릴때 이펙트
+    [SerializeField] private ParticleSystem m_snowBallRunSplashEffect = null;       // 플레이어 달릴때 이펙트(조절용)
     [SerializeField] private ParticleSystem m_camSplashEffect = null;               // 플레이어 달릴때 카메라에 나올 이펙트
 
     [SerializeField] protected ParticleSystem m_crashHitEffect = null;              // 일반(장애물)에 부딪힐때 나오는 이펙트
-    [SerializeField] protected ParticleSystem m_crashRockEffect = null;             // 바위(장애물)에 부딪힐때 나오는 이펙 
-
+    [SerializeField] protected ParticleSystem m_crashRockEffect = null;             // 바위(장애물)에 부딪힐때 나오는 이펙트
 
 
     [Header("클리어시 Tf")]
@@ -95,7 +94,8 @@ public class PlayerManager : MonoBehaviour
     {
         SetAnimSpeedOrigin();
 
-        this.transform.position = m_playerStartTf;
+        //this.transform.position = m_playerStartTf;
+        this.transform.position = this.transform.position - new Vector3(0, 0, 100);
         this.transform.rotation = Quaternion.Euler(0, 0, 0);
 
         //m_animCtrl.SetTrigger("Idle");
@@ -121,7 +121,10 @@ public class PlayerManager : MonoBehaviour
     {
         m_animCtrl.ResetTrigger("Idle");
         m_animCtrl.SetTrigger("Push");
-        m_splashEffect.SetActive(true);
+
+        //if(m_playerRunSplashEffect != null)
+        //    m_playerRunSplashEffect.SetActive(true);
+
 
         m_playerState = ePlayerState.Run;
     }
@@ -143,7 +146,7 @@ public class PlayerManager : MonoBehaviour
                                     m_playerState = ePlayerState.Happy;
 
                                     m_animCtrl.SetTrigger("Clear");
-                                    m_splashEffect.SetActive(false);
+                                    //m_playerRunSplashEffect.SetActive(false);
 
                                     // === 눈덩이 Player Obj에서 떼어낸 후 => 굴러가게 === //
                                     m_snowBallObj.transform.SetParent(m_playerParentTf.transform);
@@ -165,14 +168,14 @@ public class PlayerManager : MonoBehaviour
 
 
         m_snowBallMeshRdr.enabled = false;                        // 눈덩이 메쉬렌더러 끄기
-        m_splashEffect.SetActive(false);                          // 플레이어 달리는 이펙트 끄기
-        m_camSplashEffect.Stop();                                 // 카메라에 붙어있는 이펙트 끄기
 
 
         m_snowBallMgr.StopRotateSnowBall();                       // 눈덩이 회전 끄기
         StopPlayerMoving();                                       // 플레이어 움직임 Stop
 
 
+        m_camSplashEffect.Stop();                                 // 카메라에 붙어있는 이펙트 끄기
+        //m_playerRunSplashEffect.SetActive(false);                 // 플레이어 달리는 이펙트 끄기
         m_snowBallMgr.SetSnowBallTrailEffect(false);              // 눈덩이 이펙트 끄기
         m_snowBallMgr.SetCamEffect(false);                        // 카메라 이펙트 끄기
 
@@ -183,9 +186,9 @@ public class PlayerManager : MonoBehaviour
                                    //.AppendInterval(1f)
                                    .AppendCallback(() =>
                                    {
-                                       InGameManager.m_camMgr.SetCamParent();           // 카메라 오브젝트 초기부모 오브젝트로
+                                       //InGameManager.m_camMgr.SetCamParent();           // 카메라 오브젝트 초기부모 오브젝트로
                                    })
-                                   .AppendInterval(1.5f)
+                                   //.AppendInterval(1.5f)
                                    .AppendCallback(() =>
                                    {
                                        this.transform.DOKill();
@@ -197,7 +200,7 @@ public class PlayerManager : MonoBehaviour
                                        m_snowBallMeshRdr.enabled = true;                            // 스노우볼 렌더링 켜기
                                        m_characterMeshRdr.enabled = true;                           // 캐릭터 렌더러 끄기
                                    })
-                                   .AppendInterval(1f)
+                                   .AppendInterval(2f)
                                    .OnComplete(() =>
                                    {
                                        InGameManager.m_camMgr.CamToPlayerProduction();          // 카메라 연출
@@ -217,7 +220,7 @@ public class PlayerManager : MonoBehaviour
         m_characterMeshRdr.enabled = false;                                // 캐릭터 렌더러 끄기
         
 
-        m_splashEffect.SetActive(false);                                  // 플레이어 달리는 이펙트 끄기
+        //m_playerRunSplashEffect.SetActive(false);                                  // 플레이어 달리는 이펙트 끄기
 
 
         StopPlayerMoving();                                               // 플레이어 움직임 Stop
@@ -270,6 +273,8 @@ public class PlayerManager : MonoBehaviour
     /// </summary>
     public virtual void StopPlayerMoving()
     {
+        m_snowBallMeshRdr.enabled = false;                                 // 스노우볼 렌더링 끄기
+
         m_snowBallMgr.ResetTweener();
         m_snowBallMgr.SetSphereCollider(false);
 
@@ -324,10 +329,17 @@ public class PlayerManager : MonoBehaviour
                                            if(m_camSplashEffect != null)
                                                m_camSplashEffect.Play();
 
-                                           m_playerRunSplashEffect.SetFloat("Speed", 70);
+                                           if (m_playerRunSplashEffect != null)
+                                               m_playerRunSplashEffect.Play();
+
+                                           if (m_snowBallRunSplashEffect != null)
+                                               m_snowBallRunSplashEffect.Play();
+
                                            m_playerMovSpd += 1;
+
+                                           InGameManager.m_camMgr.SetMotionBlur(true);
                                        })
-                                       .AppendInterval(2f)
+                                       .AppendInterval(4f)
                                        .OnComplete(() =>
                                        {
                                            //InGameManager.m_fastZoneTrail.m_isTrailOn = false;
@@ -335,8 +347,15 @@ public class PlayerManager : MonoBehaviour
                                            if(m_camSplashEffect != null)
                                                m_camSplashEffect.Stop();
 
-                                           m_playerRunSplashEffect.SetFloat("Speed", 18);
+                                           if(m_playerRunSplashEffect != null)
+                                               m_playerRunSplashEffect.Stop();
+
+                                           if (m_snowBallRunSplashEffect != null)
+                                               m_snowBallRunSplashEffect.Stop();
+
                                            m_playerMovSpd -= 1;
+
+                                           InGameManager.m_camMgr.SetMotionBlur(false);
                                        });
             }
             else if(other.gameObject.layer == LayerMask.NameToLayer("GoalLine"))

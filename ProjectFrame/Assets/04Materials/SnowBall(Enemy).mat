@@ -10,7 +10,6 @@ Material:
   m_Name: SnowBall(Enemy)
   m_Shader: {fileID: 4800000, guid: ca42b045b3c0f7347b617cef8e64d9f1, type: 3}
   m_ShaderKeywords: CURVEDWORLD_BEND_ID_1 CURVEDWORLD_BEND_TYPE_CYLINDRICALROLLOFF_Z
-    _TEXTUREMIX_NONE
   m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0

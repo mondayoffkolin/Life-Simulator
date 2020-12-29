@@ -9,13 +9,15 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Player Material
   m_Shader: {fileID: 4800000, guid: bee44b4a58655ee4cbff107302a3e131, type: 3}
-  m_ShaderKeywords: DR_RIM_ON _CELPRIMARYMODE_SINGLE _EMISSION _SPECULAR_SETUP _TEXTUREBLENDINGMODE_MULTIPLY
+  m_ShaderKeywords: CURVEDWORLD_BEND_ID_1 CURVEDWORLD_BEND_TYPE_CYLINDRICALROLLOFF_Z
+    DR_RIM_ON _CELPRIMARYMODE_SINGLE _EMISSION _SPECULAR_SETUP _TEXTUREBLENDINGMODE_MULTIPLY
     _UNITYSHADOWMODE_NONE
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap: {}
+  stringTagMap:
+    RenderType: CurvedWorld_Opaque
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
@@ -137,6 +139,7 @@ Material:
     - _ColorDimExtra: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
     - _ColorDimSteps: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
     - _ColorGradient: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
+    - _CurvedWorldBendSettings: {r: 10, g: 1, b: 0, a: 0}
     - _EmissionColor: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 1}
     - _FlatRimColor: {r: 0.754717, g: 0.754717, b: 0.754717, a: 1}
     - _FlatSpecularColor: {r: 1, g: 0.9838052, b: 0.5801887, a: 1}

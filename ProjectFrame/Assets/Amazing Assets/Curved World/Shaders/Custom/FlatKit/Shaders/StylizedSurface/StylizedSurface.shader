@@ -1,4 +1,4 @@
-﻿Shader "FlatKit/Stylized Surface"
+Shader "FlatKit/Stylized Surface"
 {
     Properties
     {
@@ -266,18 +266,13 @@
 
         #pragma skip_variants POINT_COOKIE DIRECTIONAL_COOKIE
 
-
-
         ENDCG
     }
 
 
 
-    FallBack "Hidden/Amazing Assets/Curved World/Fallback/VertexLit"
-
-    CustomEditor "AmazingAssets.CurvedWorldEditor.DefaultShaderGUI"
-    //FallBack "Diffuse"
+    FallBack "Diffuse"
     // */
 
-    //CustomEditor "StylizedSurfaceEditor"
+    CustomEditor "StylizedSurfaceEditor"
 }

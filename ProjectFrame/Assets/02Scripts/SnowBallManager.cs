@@ -58,7 +58,7 @@ public class SnowBallManager : MonoBehaviour
 
     private void Start()
     {
-        m_curSnowBallSize = eSnowBallSize.One;
+        //m_curSnowBallSize = eSnowBallSize.One;
         
         m_originSnowBallIncreaseVec = m_snowBallIncreaseVec;
 
