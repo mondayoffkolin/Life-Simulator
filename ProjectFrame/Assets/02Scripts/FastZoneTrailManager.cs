@@ -65,57 +65,11 @@ public class FastZoneTrailManager : MonoBehaviour
 
         a_trailObj.SetActive(true);
     }
-    public void SetTrailVec()
+    public void SetTrailVec(bool a_isReset)
     {
-        if ((int)m_snowballTf.localScale.x < 20)
+        if(a_isReset == true)
             m_trailVec = new Vector3(11, 1, 6);
-        else if ((int)m_snowballTf.localScale.x == 20)
-            m_trailVec = new Vector3(14, 1, 10);
-        else if ((int)m_snowballTf.localScale.x == 25)
-            m_trailVec = new Vector3(17, 1, 12);
-        else if ((int)m_snowballTf.localScale.x == 30)
-            m_trailVec = new Vector3(20, 1, 14);
-        else if ((int)m_snowballTf.localScale.x == 35)
-            m_trailVec = new Vector3(22, 1, 16);
-        else if ((int)m_snowballTf.localScale.x == 40)
-            m_trailVec = new Vector3(24, 1, 18);
-        else if ((int)m_snowballTf.localScale.x == 45)
-            m_trailVec = new Vector3(26, 1, 20);
-        else if ((int)m_snowballTf.localScale.x == 50)
-            m_trailVec = new Vector3(28, 1, 22);
-        else if ((int)m_snowballTf.localScale.x == 55)
-            m_trailVec = new Vector3(30, 1, 24);
-        else if ((int)m_snowballTf.localScale.x == 60)
-            m_trailVec = new Vector3(32, 1, 26);
-        else if ((int)m_snowballTf.localScale.x == 65)
-            m_trailVec = new Vector3(34, 1, 28);
-        else if ((int)m_snowballTf.localScale.x == 70)
-            m_trailVec = new Vector3(36, 1, 30);
-        else if ((int)m_snowballTf.localScale.x == 75)
-            m_trailVec = new Vector3(38, 1, 32);
-        else if ((int)m_snowballTf.localScale.x == 90)
-            m_trailVec = new Vector3(40, 1, 34);
-        else if ((int)m_snowballTf.localScale.x == 95)
-            m_trailVec = new Vector3(42, 1, 36);
-        else if ((int)m_snowballTf.localScale.x == 100)
-            m_trailVec = new Vector3(44, 1, 38);
-        else if ((int)m_snowballTf.localScale.x == 105)
-            m_trailVec = new Vector3(46, 1, 40);
-        else if ((int)m_snowballTf.localScale.x == 110)
-            m_trailVec = new Vector3(48, 1, 42);
-        else if ((int)m_snowballTf.localScale.x == 115)
-            m_trailVec = new Vector3(50, 1, 44);
-        else if ((int)m_snowballTf.localScale.x == 120)
-            m_trailVec = new Vector3(52, 1, 46);
-        else if ((int)m_snowballTf.localScale.x == 125)
-            m_trailVec = new Vector3(54, 1, 48);
-        else if ((int)m_snowballTf.localScale.x == 130)
-            m_trailVec = new Vector3(56, 1, 50);
-        else if ((int)m_snowballTf.localScale.x == 135)
-            m_trailVec = new Vector3(58, 1, 52);
-        else if ((int)m_snowballTf.localScale.x == 140)
-            m_trailVec = new Vector3(60, 1, 54);
-        else if ((int)m_snowballTf.localScale.x == 150)
-            m_trailVec = new Vector3(62, 1, 56);
+        else
+            m_trailVec += new Vector3(m_trailVec.x + 0.001f, 1, m_trailVec.z + 0.001f);
     }
 }

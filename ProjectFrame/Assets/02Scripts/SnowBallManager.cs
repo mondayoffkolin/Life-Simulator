@@ -50,7 +50,10 @@ public class SnowBallManager : MonoBehaviour
     [SerializeField] private Transform[] m_obstaclePosTf = null;
     [SerializeField] private Transform m_obstacleParentTf = null;              // 장애물이 눈덩이에 속할 부모Tf
     [SerializeField] private CharacterInSnowBall[] m_characterObj = null;
-    
+
+
+    private float m_snowBallSizeX = 0;
+    private float m_snowBallISizeTmp = 0;
 
     private List<Tweener> m_tweener;
     private List<Tweener> m_tweenerD;
@@ -82,78 +85,9 @@ public class SnowBallManager : MonoBehaviour
             switch (m_curSnowBallSize)
             {
                 case eSnowBallSize.One:
-                    if (this.transform.localScale.x >= 35)
+                    if (m_snowBallISizeTmp - m_snowBallSizeX >= 4)
                     {
-                        m_curSnowBallSize = eSnowBallSize.ThirtyFive;
-
-                        if (m_isPlayer == true)
-                        {
-                            InGameManager.m_camMgr.SetFollowOffset(true);           // 카메라 뒤로 줌아웃
-                            InGameManager.m_plyMgr.SetAnimSpeedUp();               // 스피드 업
-                            m_snowBallIncreaseVec = new Vector3(.2f, .2f, .2f);
-                        }
-                        else
-                        {
-                            float a_increaseNum = Random.Range(.05f, .12f);
-                            m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
-                            m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
-                        }
-
-                        SetSnowBallScale(m_curSnowBallSize);
-                        break;
-                    }
-                    break;
-
-                case eSnowBallSize.ThirtyFive:
-                    if (this.transform.localScale.x >= 90)
-                    {
-                        m_curSnowBallSize = eSnowBallSize.Ninety;
-
-                        if (m_isPlayer == true)
-                        {
-                            InGameManager.m_camMgr.SetFollowOffset(true);
-                            InGameManager.m_plyMgr.SetAnimSpeedUp();
-                            m_snowBallIncreaseVec = new Vector3(.3f, .3f, .3f);
-                        }
-                        else
-                        {
-                            float a_increaseNum = Random.Range(.1f, .2f);
-                            m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
-                            m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
-                        }
-
-                        SetSnowBallScale(m_curSnowBallSize);
-                        break;
-                    }
-                    break;
-
-                case eSnowBallSize.Ninety:
-                    if (this.transform.localScale.x >= 150)
-                    {
-                        m_curSnowBallSize = eSnowBallSize.HundredFIf;
-
-                        if (m_isPlayer == true)
-                        {
-                            InGameManager.m_camMgr.SetFollowOffset(true);
-                            InGameManager.m_plyMgr.SetAnimSpeedUp();
-                            m_snowBallIncreaseVec = new Vector3(.5f, .5f, .5f);
-                        }
-                        else
-                        {
-                            float a_increaseNum = Random.Range(.2f, .3f);
-                            m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
-                            m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
-                        }
-
-                        SetSnowBallScale(m_curSnowBallSize);
-                        break;
-                    }
-                    break;
-
-                case eSnowBallSize.HundredFIf:
-                    if (this.transform.localScale.x > 210)
-                    {
-                        m_curSnowBallSize = eSnowBallSize.TwoHdTen;
+                        m_snowBallSizeX = m_snowBallISizeTmp;
 
                         if (m_isPlayer == true)
                         {
@@ -162,48 +96,16 @@ public class SnowBallManager : MonoBehaviour
                         }
                         else
                         {
-                            float a_increaseNum = Random.Range(.3f, .35f);
-                            m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
+                            //float a_increaseNum = Random.Range(.5f, .6f);
+                            //m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
                             m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
                         }
 
-
-                        SetSnowBallScale(m_curSnowBallSize);
-                        break;
+                        SetSnowBallScale(false);
                     }
-                    break;
-                case eSnowBallSize.TwoHdTen:
-                    if (this.transform.localScale.x > 280)
+                    else
                     {
-                        m_curSnowBallSize = eSnowBallSize.TwoHdEighty;
-
-                        if (m_isPlayer == true)
-                        {
-                            InGameManager.m_camMgr.SetFollowOffset(true);
-                            InGameManager.m_plyMgr.SetAnimSpeedUp();
-                        }
-                        else
-                            m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
-
-                        SetSnowBallScale(m_curSnowBallSize);
-                        break;
-                    }
-                    break;
-                case eSnowBallSize.TwoHdEighty:
-                    if (this.transform.localScale.x > 355)
-                    {
-                        m_curSnowBallSize = eSnowBallSize.End;
-
-                        if (m_isPlayer == true)
-                        {
-                            InGameManager.m_camMgr.SetFollowOffset(true);
-                            InGameManager.m_plyMgr.SetAnimSpeedUp();
-                        }
-                        else
-                            m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
-
-                        SetSnowBallScale(m_curSnowBallSize);
-                        break;
+                        m_snowBallISizeTmp = this.transform.localScale.x;
                     }
                     break;
             }
@@ -216,14 +118,14 @@ public class SnowBallManager : MonoBehaviour
 
 
             // === 스노우볼 흔적 === //
-            m_fastZoneTrailMgr.SetTrailVec();
+            m_fastZoneTrailMgr.SetTrailVec(false);
             m_fastZoneTrailMgr.DequeueTrailEffect();
             // === 스노우볼 흔적 === //
         }
         else
         {
-            m_fastZoneTrailMgr.SetTrailVec();
-            SetSnowBallScale(m_curSnowBallSize);
+            m_fastZoneTrailMgr.SetTrailVec(true);       // 캐릭터가 달리지 않는다면 흔적 크기 초기활
+            SetSnowBallScale(true);                     // 캐릭터가 달리지 않는다면 이펙트 크기 초기화
         }
     }
 
@@ -240,7 +142,7 @@ public class SnowBallManager : MonoBehaviour
             m_myCharacter.SetAnim_Push();                                   // 플레이어 Push Anim 실행
             SetSnowBallTrailEffect(true);                                   // Snowball 이펙트 켜기
             if(m_isPlayer == true)
-                SetCamEffect(true);                                             // 카메라 이펙트 켜기
+                SetCamEffect(true);                                         // 카메라 이펙트 켜기
 
             //InGameManager.m_fastZoneTrail.m_isTrailOn = true;
             m_fastZoneTrailMgr.m_isTrailOn = true;
@@ -249,7 +151,7 @@ public class SnowBallManager : MonoBehaviour
             m_tweener.Add(this.transform.DOScale(this.transform.localScale + m_snowBallIncreaseVec, .1f)
                     .SetEase(Ease.Linear)
                     .SetLoops(-1, LoopType.Incremental));
-            m_tweener.Add(this.transform.DOLocalMove(new Vector3(0, 0, this.transform.localPosition.z + .04f), .1f)
+            m_tweener.Add(this.transform.DOLocalMove(new Vector3(0, -1.7f, this.transform.localPosition.z + .02f), .1f)
                     .SetEase(Ease.Linear)
                     .SetLoops(-1, LoopType.Incremental));
             #endregion
@@ -269,14 +171,14 @@ public class SnowBallManager : MonoBehaviour
                     case eSnowBallSize.ThirtyFive:
                         InGameManager.m_camMgr.SetFollowOffset(false);
 
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(10f, 10f, 10f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 8.8f), .3f)
+                        m_tweenerD.Add(this.transform.DOScale(new Vector3(15f, 15f, 15f), .3f));
+                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 14f), .3f)
                                   .OnComplete(() =>
                                   {
                                       m_curSnowBallSize = eSnowBallSize.One;
 
                                       m_tweenerD.Clear();
-                                      m_snowBallIncreaseVec = new Vector3(.1f, .1f, .1f);
+                                      //m_snowBallIncreaseVec = new Vector3(.1f, .1f, .1f);
 
                                       SetSphereCollider(true);          
                                       SetSnowBallSize(true);
@@ -288,14 +190,14 @@ public class SnowBallManager : MonoBehaviour
                         InGameManager.m_camMgr.SetFollowOffset(false);
 
 
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(50f, 50f, 50f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 22.5f), .3f)
+                        m_tweenerD.Add(this.transform.DOScale(new Vector3(35f, 35f, 35f), .3f));
+                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 22f), .3f)
                                   .OnComplete(() =>
                                   {
                                       m_curSnowBallSize = eSnowBallSize.ThirtyFive;
 
                                       m_tweenerD.Clear();
-                                      m_snowBallIncreaseVec = new Vector3(.2f, .2f, .2f);
+                                      //m_snowBallIncreaseVec = new Vector3(.2f, .2f, .2f);
 
                                       SetSphereCollider(true);
                                       SetSnowBallSize(true);
@@ -306,14 +208,14 @@ public class SnowBallManager : MonoBehaviour
                         InGameManager.m_camMgr.SetFollowOffset(false);
 
 
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(100f, 100f, 100f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 32f), .3f)
+                        m_tweenerD.Add(this.transform.DOScale(new Vector3(80f, 80f, 80f), .3f));
+                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 44f), .3f)
                                   .OnComplete(() =>
                                   {
                                       m_curSnowBallSize = eSnowBallSize.Ninety;
 
                                       m_tweenerD.Clear();
-                                      m_snowBallIncreaseVec = new Vector3(.3f, .3f, .3f);
+                                      //m_snowBallIncreaseVec = new Vector3(.3f, .3f, .3f);
 
                                       SetSphereCollider(true);
                                       SetSnowBallSize(true);
@@ -333,14 +235,14 @@ public class SnowBallManager : MonoBehaviour
                         break;
 
                     case eSnowBallSize.ThirtyFive:
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(10f, 10f, 10f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 8.8f), .3f)
+                        m_tweenerD.Add(this.transform.DOScale(new Vector3(15f, 15f, 15f), .3f));
+                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 14f), .3f)
                                   .OnComplete(() =>
                                   {
                                       m_curSnowBallSize = eSnowBallSize.One;
 
-                                      float a_increaseNum = Random.Range(.05f, .12f);
-                                      m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
+                                      //float a_increaseNum = Random.Range(.05f, .12f);
+                                      //m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
 
                                       m_tweenerD.Clear();
 
@@ -351,14 +253,14 @@ public class SnowBallManager : MonoBehaviour
                         break;
 
                     case eSnowBallSize.Ninety:
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(50f, 50f, 50f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 22.5f), .3f)
+                        m_tweenerD.Add(this.transform.DOScale(new Vector3(35f, 35f, 35f), .3f));
+                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 22f), .3f)
                                   .OnComplete(() =>
                                   {
                                       m_curSnowBallSize = eSnowBallSize.ThirtyFive;
 
-                                      float a_increaseNum = Random.Range(.1f, .2f);
-                                      m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
+                                      //float a_increaseNum = Random.Range(.1f, .2f);
+                                      //m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
 
                                       m_tweenerD.Clear();
 
@@ -369,14 +271,14 @@ public class SnowBallManager : MonoBehaviour
                         break;
 
                     case eSnowBallSize.HundredFIf:
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(100f, 100f, 100f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 32f), .3f)
+                        m_tweenerD.Add(this.transform.DOScale(new Vector3(80f, 80f, 80f), .3f));
+                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 44f), .3f)
                                   .OnComplete(() =>
                                   {
                                       m_curSnowBallSize = eSnowBallSize.Ninety;
 
-                                      float a_increaseNum = Random.Range(.2f, .3f);
-                                      m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
+                                      //float a_increaseNum = Random.Range(.2f, .3f);
+                                      //m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
 
                                       m_tweenerD.Clear();
 
@@ -530,33 +432,17 @@ public class SnowBallManager : MonoBehaviour
 
 
     #region 눈덩이 이펙트 관련
-    public void SetSnowBallScale(eSnowBallSize a_snowBallSize)
+    public void SetSnowBallScale(bool a_isReset)
     {
-        switch(a_snowBallSize)
+        if(a_isReset == true)
         {
-            case eSnowBallSize.One:
-                for (int n = 0; n < m_snowEffectTf.Length; n++)
-                    m_snowEffectTf[n].localScale = new Vector3(1.5f, 1.5f, 1.5f);
-                break;
-
-            case eSnowBallSize.ThirtyFive:
-                for (int n = 0; n < m_snowEffectTf.Length; n++)
-                    m_snowEffectTf[n].localScale = new Vector3(3, 3, 3);
-                break;
-
-            case eSnowBallSize.Ninety:
-                for (int n = 0; n < m_snowEffectTf.Length; n++)
-                    m_snowEffectTf[n].localScale = new Vector3(6, 6, 6);
-                break;
-
-            case eSnowBallSize.HundredFIf:
-            case eSnowBallSize.TwoHdTen:
-            case eSnowBallSize.TwoHdEighty:
-            case eSnowBallSize.ThreeHdFIfFive:
-            case eSnowBallSize.End:
-                for (int n = 0; n < m_snowEffectTf.Length; n++)
-                    m_snowEffectTf[n].localScale = new Vector3(10, 10, 10);
-                break;
+            for (int n = 0; n < m_snowEffectTf.Length; n++)
+                m_snowEffectTf[n].localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        }
+        else
+        {
+            for (int n = 0; n < m_snowEffectTf.Length; n++)
+                m_snowEffectTf[n].localScale *= 2;
         }
     }
 
@@ -616,9 +502,9 @@ public class SnowBallManager : MonoBehaviour
                 break;
 
             case eSnowBallSize.ThirtyFive:
-                this.transform.DOScale(this.transform.localScale + new Vector3(40, 40, 40), .1f)
+                this.transform.DOScale(this.transform.localScale + new Vector3(35, 35, 35), .1f)
                               .SetEase(Ease.Linear);
-                this.transform.DOLocalMove(new Vector3(0, 0, this.transform.localPosition.z + 12.5f), .1f)
+                this.transform.DOLocalMove(new Vector3(0, 0, this.transform.localPosition.z + 8f), .1f)
                               .SetEase(Ease.Linear)
                               .OnComplete(() =>
                               {
@@ -627,7 +513,7 @@ public class SnowBallManager : MonoBehaviour
                 break;
 
             case eSnowBallSize.Ninety:
-                this.transform.DOScale(this.transform.localScale + new Vector3(96, 96, 96), .1f)
+                this.transform.DOScale(this.transform.localScale + new Vector3(80, 80, 80), .1f)
                              .SetEase(Ease.Linear);
                 this.transform.DOLocalMove(new Vector3(0, 0, this.transform.localPosition.z + 30f), .1f)
                               .SetEase(Ease.Linear)
@@ -646,6 +532,18 @@ public class SnowBallManager : MonoBehaviour
                               {
                                   SetSnowBallSize(true);
                               });
+                break;
+
+            case eSnowBallSize.End:
+                this.transform.DOScale(this.transform.localScale + new Vector3(160, 160, 160), .1f)
+                         .SetEase(Ease.Linear);
+                this.transform.DOLocalMove(new Vector3(0, 0, this.transform.localPosition.z + 50f), .1f)
+                              .SetEase(Ease.Linear)
+                              .OnComplete(() =>
+                              {
+                                  SetSnowBallSize(true);
+                              });
+
                 break;
         }
 

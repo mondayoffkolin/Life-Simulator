@@ -23,7 +23,7 @@ public class PlayerManager : MonoBehaviour
     [Header("플레이어 스탯")]
     public float m_playerMovSpd = 1f;                                               // 플레이어 움직임 속도
     [SerializeField] protected float m_originPlayerMovSpd = 1f;                     // 플레이어 움직임 속도
-    [SerializeField] protected SkinnedMeshRenderer m_characterMeshRdr = null;       // 플레이어 렌더
+    [SerializeField] protected SkinnedMeshRenderer[] m_characterMeshRdr = null;       // 플레이어 렌더
 
 
     [Header("스노우볼 Obj")]
@@ -198,7 +198,8 @@ public class PlayerManager : MonoBehaviour
 
                                        m_snowBallMgr.SetLocalScale();                               // 스노우볼 크기 초기화
                                        m_snowBallMeshRdr.enabled = true;                            // 스노우볼 렌더링 켜기
-                                       m_characterMeshRdr.enabled = true;                           // 캐릭터 렌더러 끄기
+                                       for(int n = 0; n < m_characterMeshRdr.Length; n++)
+                                           m_characterMeshRdr[n].enabled = true;                           // 캐릭터 렌더러 끄기
                                    })
                                    .AppendInterval(2f)
                                    .OnComplete(() =>
@@ -217,7 +218,8 @@ public class PlayerManager : MonoBehaviour
 
 
         m_snowBallMeshRdr.enabled = false;                                 // 스노우볼 렌더링 끄기
-        m_characterMeshRdr.enabled = false;                                // 캐릭터 렌더러 끄기
+        for (int n = 0; n < m_characterMeshRdr.Length; n++)
+            m_characterMeshRdr[n].enabled = false;                         // 캐릭터 렌더러 끄기
         
 
         //m_playerRunSplashEffect.SetActive(false);                                  // 플레이어 달리는 이펙트 끄기
@@ -241,7 +243,8 @@ public class PlayerManager : MonoBehaviour
 
                                        m_snowBallMgr.SetLocalScale();                 // 스노우볼 크기 초기화
                                        m_snowBallMeshRdr.enabled = true;              // 스노우볼 렌더링 켜기
-                                       m_characterMeshRdr.enabled = true;             // 스노우볼 렌더링 켜기
+                                       for (int n = 0; n < m_characterMeshRdr.Length; n++)
+                                           m_characterMeshRdr[n].enabled = true;             // 스노우볼 렌더링 켜기
                                    })
                                    .AppendInterval(1f)
                                    .OnComplete(() =>
@@ -290,7 +293,7 @@ public class PlayerManager : MonoBehaviour
     /// </summary>
     public virtual void SetAnimSpeedUp()
     {
-        m_animCtrl.speed += 1.1f;
+        m_animCtrl.speed += 0.2f;
         m_playerMovSpd += 1.1f;
     }
     /// <summary>

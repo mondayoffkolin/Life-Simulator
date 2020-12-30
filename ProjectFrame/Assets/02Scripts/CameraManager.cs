@@ -19,7 +19,8 @@ public class CameraManager : MonoBehaviour
     public float m_rotationSpeed = 8;                             // (GameState = Play)터치시 플레이어 회전 스피드.
     [SerializeField] private float m_originRotationSpeed = 5;                             // (GameState = Play)터치시 플레이어 회전 스피드.
     private Vector3 Gap = Vector3.zero;                            // (GameState = Play)회전 축적 값.
-    private Vector3 m_followOffset = new Vector3(0, 75, -90);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
+    //private Vector3 m_followOffset = new Vector3(0, 75, -90);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
+    private Vector3 m_followOffset = new Vector3(0, 10, -15);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
 
 
 
@@ -59,7 +60,7 @@ public class CameraManager : MonoBehaviour
                          Gap.y += Input.GetAxis("Mouse X") * m_rotationSpeed;
             
                          Gap.y += InGameManager.m_joystick.Horizontal;
-                         Gap.y = Mathf.Clamp(Gap.y, -80f, 80f);
+                         //Gap.y = Mathf.Clamp(Gap.y, -80f, 80f);
             
                          TargetRotation = Quaternion.Euler(Gap);
                      }
@@ -79,7 +80,7 @@ public class CameraManager : MonoBehaviour
                         Gap.y += Input.GetAxis("Mouse X") * m_rotationSpeed;
 
                         Gap.y += InGameManager.m_joystick.Horizontal;
-                        Gap.y = Mathf.Clamp(Gap.y, -80f, 80f);
+                        //Gap.y = Mathf.Clamp(Gap.y, -80f, 80f);
 
                         TargetRotation = Quaternion.Euler(Gap);
                     }
@@ -95,27 +96,29 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     public void CamToPlayerProduction(bool a_gameStart = false)
     {
-        //m_camStartPosTf = GameObject.FindGameObjectWithTag("CameraStartPos").transform;
-
-
         m_rotationSpeed = m_originRotationSpeed;
 
 
         if (a_gameStart == false)
             InGameManager.uniqueInstance.PlayPlayerGame();
+        else
+        {
+            m_camStartPosTf = GameObject.FindGameObjectWithTag("CameraStartPos").transform;
 
-        //this.transform.DOMove(m_camStartPosTf.position, 1f);
-        //this.transform.DOLocalRotate(m_camStartPosTf.eulerAngles, 1f)
-        //                  .OnComplete(() =>
-        //                  {
-        //                      this.transform.SetParent(m_playerTf.transform);
-        //                      this.transform.DOLookAt(m_lookPosTf.position, .5f).SetDelay(1.5f)
-        //                                        .OnComplete(() =>
-        //                                        {
-        //                                            if(a_gameStart == false)
-        //                                                InGameManager.uniqueInstance.PlayPlayerGame();
-        //                                        });
-        //                  });
+            this.transform.DOMove(m_camStartPosTf.position, 1f);
+            this.transform.DOLocalRotate(m_camStartPosTf.eulerAngles, 1f)
+                              .OnComplete(() =>
+                              {
+                                  this.transform.SetParent(m_playerTf.transform);
+                                  this.transform.DOLookAt(m_lookPosTf.position, .5f).SetDelay(1.5f)
+                                                    .OnComplete(() =>
+                                                    {
+                                                        if (a_gameStart == false)
+                                                            InGameManager.uniqueInstance.PlayPlayerGame();
+                                                    });
+                              });
+        }
+
     }
 
     

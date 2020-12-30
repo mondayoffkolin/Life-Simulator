@@ -137,7 +137,8 @@ public class AIManager : PlayerManager
                            
                            //m_snowBallMgr.SetLocalScale();                 // 스노우볼 크기 초기화
                            m_snowBallMeshRdr.enabled = true;              // 스노우볼 렌더링 켜기
-                           m_characterMeshRdr.enabled = true;             // 캐릭터 렌더러 끄기
+                           for (int n = 0; n < m_characterMeshRdr.Length; n++)
+                               m_characterMeshRdr[n].enabled = true;             // 캐릭터 렌더러 끄기
                        })
                        .AppendInterval(2f)
                        .OnComplete(() =>
@@ -156,7 +157,8 @@ public class AIManager : PlayerManager
         m_playerState = ePlayerState.Death;
 
         m_snowBallMeshRdr.enabled = false;                                 // 스노우볼 렌더링 끄기
-        m_characterMeshRdr.enabled = false;                                // 캐릭터 렌더러 끄기
+        for (int n = 0; n < m_characterMeshRdr.Length; n++)
+            m_characterMeshRdr[n].enabled = false;                                // 캐릭터 렌더러 끄기
 
 
 
@@ -173,8 +175,8 @@ public class AIManager : PlayerManager
 
                            m_snowBallMgr.SetLocalScale();                 // 스노우볼 크기 초기화
                            m_snowBallMeshRdr.enabled = true;              // 스노우볼 렌더링 켜기
-
-                           m_characterMeshRdr.enabled = true;             // 캐릭터 렌더링 켜기
+                           for (int n = 0; n < m_characterMeshRdr.Length; n++)
+                               m_characterMeshRdr[n].enabled = true;             // 캐릭터 렌더링 켜기
                        })
                        .AppendInterval(3f)
                        .OnComplete(() =>

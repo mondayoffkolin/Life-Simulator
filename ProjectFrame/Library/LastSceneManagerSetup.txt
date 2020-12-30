@@ -8,6 +8,10 @@ sceneSetups:
   isLoaded: 0
   isActive: 0
   isSubScene: 0
+- path: Assets/RPGPP_LT/Scene/rpgpp_lt_scene_1.0.unity
+  isLoaded: 0
+  isActive: 0
+  isSubScene: 0
 - path: Assets/Paper Environment Pack vol. 1/TerrainDemo_Winter.unity
   isLoaded: 0
   isActive: 0

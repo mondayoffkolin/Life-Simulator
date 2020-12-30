@@ -1,1 +1,0 @@
-Assets/Amazing Assets/Curved World/Shaders/Custom/FlatKit/Shaders/StylizedSurface/StylizedSurface.shader
