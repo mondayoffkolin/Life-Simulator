@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SnowBallFootPrint : MonoBehaviour
 {
+    [SerializeField] bool m_isOnTheSnow = true;
     [SerializeField] FastZoneTrailManager m_fastZoneTrail = null;
 
     private void OnEnable()
@@ -14,11 +15,14 @@ public class SnowBallFootPrint : MonoBehaviour
 
     private void OnDisable()
     {
-        m_fastZoneTrail.EnqueueTrailEffect(this.gameObject);
+        if(m_isOnTheSnow == true)
+            m_fastZoneTrail.EnqueueTrailOnSnowEffect(this.gameObject);
+        else
+            m_fastZoneTrail.EnqueueTrailOnSoilEffect(this.gameObject);
     }
 
 
-    WaitForSeconds m_delayTime = new WaitForSeconds(1f);
+    WaitForSeconds m_delayTime = new WaitForSeconds(1.3f);
     private IEnumerator SetDisable()
     {
         yield return m_delayTime;

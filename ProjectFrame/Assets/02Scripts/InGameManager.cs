@@ -65,12 +65,17 @@ public class InGameManager : MonoBehaviour
         m_aiPathMgr = FindObjectOfType<AIPathManager>();
 
         // === AI 초기화 관련 === //
-        for (int n = 0; n < m_aiMgrs.Length; n++)
+        if (m_aiMgrs != null && m_aiPathMgr != null)
         {
-            m_aiMgrs[n].SetPlayerStartPos();                                 // AI StartPos 초기화
-            m_aiMgrs[n].m_snowBallMgr.m_fastZoneTrailMgr.SetTrailPooling();  // AI SnowBall 흔적풀링 초기화
-            m_aiMgrs[n].SetAIPath();                                         // AI StartPos 지나갈 자리 초기
+            for (int n = 0; n < m_aiMgrs.Length; n++)
+            {
+                m_aiMgrs[n].SetPlayerStartPos();                                 // AI StartPos 초기화
+                m_aiMgrs[n].m_snowBallMgr.m_fastZoneTrailMgr.SetTrailOnSnowPooling();  // AI SnowBall 흔적풀링 초기화
+                m_aiMgrs[n].SetAIPath();                                         // AI StartPos 지나갈 자리 초기
+            }
         }
+        else
+            print("AIManager나 AIPathManager 중 찾을 수 없습니다.");
         // === AI 초기화 관련 === //
 
 
@@ -97,21 +102,12 @@ public class InGameManager : MonoBehaviour
 
 
                                        // === 플레이어 초기화 관련 === //
-                                       m_plyMgr.SetPlayerStartPos();                                // 플레이어 StartPos 초기화
-                                       m_plyMgr.m_snowBallMgr.m_fastZoneTrailMgr.SetTrailPooling(); // fastzone에서의 이펙트 풀링 초기화
-                                                                                                    //m_fastZoneTrail.SetTrailPooling();                         // fastzone에서의 이펙트 풀링 초기화
+                                       m_plyMgr.SetPlayerStartPos();                                            // 플레이어 StartPos 초기화
+                                       m_plyMgr.m_snowBallMgr.m_fastZoneTrailMgr.SetTrailOnSnowPooling();       // fastzone에서의 이펙트 풀링 초기화
+                                       m_plyMgr.m_snowBallMgr.m_fastZoneTrailMgr.SetTrailOnSoilPooling();       // fastzone에서의 이펙트 풀링 초기화
                                        // === 플레이어 초기화 관련 === //
 
 
-                                       //// === AI 초기화 관련 === //
-                                       //for (int n = 0; n < m_aiMgrs.Length; n++)
-                                       //{
-                                       //    m_aiMgrs[n].SetPlayerStartPos();                                 // AI StartPos 초기화
-                                       //    m_aiMgrs[n].m_snowBallMgr.m_fastZoneTrailMgr.SetTrailPooling();  // AI SnowBall 흔적풀링 초기화
-                                       //    m_aiMgrs[n].SetAIPath();                                         // AI StartPos 지나갈 자리 초기
-                                       //}
-                                       //// === AI 초기화 관련 === //
-                                       
                                        m_curGameState = eGameState.Start;
                                    })
                                    .AppendInterval(4f)
@@ -120,7 +116,6 @@ public class InGameManager : MonoBehaviour
                                        // === 게임 시작! === //
                                        PlayPlayerGame();
                                        // === 게임 시작! === //
-
                                    });
     }
 
@@ -137,7 +132,6 @@ public class InGameManager : MonoBehaviour
         m_camMgr = FindObjectOfType<CameraManager>();
         m_joystick = FindObjectOfType<Joystick>();
         m_bombArea = FindObjectOfType<P_BombArea>();
-        // m_fastZoneTrail = FindObjectOfType<FastZoneTrailManager>();
         m_aiMgrs = FindObjectsOfType<AIManager>();
 
 
@@ -145,7 +139,6 @@ public class InGameManager : MonoBehaviour
 
         if (m_camMgr != null && m_plyMgr != null && m_snowBallMgr != null &&
             m_joystick != null && m_snowGround != null && m_bombArea != null)
-            //&& m_fastZoneTrail != null)
             print("Objs 찾기완료!");
         // === 메인 Obj인스턴스 찾기 === //
     }
@@ -160,10 +153,10 @@ public class InGameManager : MonoBehaviour
         m_plyMgr.m_isMoving = true;                           // 플레이어 움직임 여부
         m_plyMgr.m_snowBallMgr.SetSphereCollider(true);       // 스노우볼 콜라이더 켜기
         m_plyMgr.m_snowBallMgr.SetSnowBallSize(true);         // 스노우볼 사이즈업 함수
+        m_plyMgr.m_snowBallMgr.SetSnowEffect(true);           // 이펙트 크기 증가 함수 (눈덩이 지나간 흔적, 눈덩이 튀기는 이펙트(왼/오))
         StartCoroutine(m_plyMgr.PlayerMoving());              // 플레이어 Forward 방향 코루틴
         // === 플레이어 관련 === //
 
-        //m_snowGround.GroundMoving();                 // (★고민중)
 
         m_curGameState = eGameState.Play;            // GameState (Play)
     }

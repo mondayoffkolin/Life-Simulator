@@ -27,28 +27,31 @@ public class SnowBallManager : MonoBehaviour
 
 
     [Header("눈덩이 오브젝트")]
-    [SerializeField] private GameObject m_snowBallObj = null;                    // 눈덩이 오브젝트
-    [SerializeField] SphereCollider m_snowBallCollider = null;                      // 눈덩이 콜라이더
-    [SerializeField] Vector3 m_originSnowBallSizeVec = Vector3.zero;            // 원래 눈덩이 크기
-    [SerializeField] Vector3 m_originSnowBallPositionVec = Vector3.zero;       // 원래 눈덩이 거리
-    public Vector3 m_snowBallIncreaseVec = new Vector3(.1f, .1f, .1f);          // 눈덩이 크지는 크기 벡터
+    [SerializeField] private GameObject m_snowBallObj = null;                 // 눈덩이 오브젝트
+    [SerializeField] private SphereCollider m_snowBallCollider = null;                // 눈덩이 콜라이더
+    [SerializeField] private Vector3 m_originSnowBallSizeVec = Vector3.zero;          // 원래 눈덩이 크기
+    [SerializeField] private Vector3 m_originSnowBallPositionVec = Vector3.zero;      // 원래 눈덩이 거리
+    public Vector3 m_snowBallIncreaseVec = Vector3.zero;        // 눈덩이 커지는 크기 벡터
+    public Vector3 m_snowBallDecreaseVec = Vector3.zero;        // 눈덩이 작아지는 크기 벡터
+    [SerializeField] private float m_increasePosZ = 0;
+    [SerializeField] private float m_decreasePosZ = 0;
     public Vector3 m_originSnowBallIncreaseVec = Vector3.zero;                // 초기 눈덩이 증가량
     public Transform m_parentTf = null;
 
 
     [Header("눈덩이 이펙트 관련")]
-    [SerializeField] Transform[] m_snowEffectTf = null;
-    [SerializeField] ParticleSystem[] m_snowTrailEffect = null;
-    public FastZoneTrailManager m_fastZoneTrailMgr = null;                      // 눈덩이 지나간 흔적
+    [SerializeField] Transform[] m_snowEffectTf = null;                       // 눈덩이 이펙트 Scale를 위한 (왼/오)
+    [SerializeField] ParticleSystem[] m_snowTrailEffect = null;               // 눈덩이 이펙트 (왼/오)
+    public FastZoneTrailManager m_fastZoneTrailMgr = null;                    // 눈덩이 지나간 흔적
 
 
     [Header("카메라 이펙트 관련")]
-    [SerializeField] ParticleSystem m_camEffect = null;
+    [SerializeField] ParticleSystem m_camEffect = null;                      // Camera Splah 이펙
 
 
     [Header("장애물과 눈덩이 관련")]
     [SerializeField] private Transform[] m_obstaclePosTf = null;
-    [SerializeField] private Transform m_obstacleParentTf = null;              // 장애물이 눈덩이에 속할 부모Tf
+    [SerializeField] private Transform m_obstacleParentTf = null;            // 장애물이 눈덩이에 속할 부모Tf
     [SerializeField] private CharacterInSnowBall[] m_characterObj = null;
 
 
@@ -96,12 +99,8 @@ public class SnowBallManager : MonoBehaviour
                         }
                         else
                         {
-                            //float a_increaseNum = Random.Range(.5f, .6f);
-                            //m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
                             m_parentTf.GetComponent<AIManager>().SetAnimSpeedUp();
                         }
-
-                        SetSnowBallScale(false);
                     }
                     else
                     {
@@ -115,17 +114,6 @@ public class SnowBallManager : MonoBehaviour
             // === 스노우볼 x축 회전 === //
             m_snowBallObj.transform.Rotate(Vector3.right * 500 * Time.deltaTime, Space.Self);
             // === 스노우볼 x축 회전 === //
-
-
-            // === 스노우볼 흔적 === //
-            m_fastZoneTrailMgr.SetTrailVec(false);
-            m_fastZoneTrailMgr.DequeueTrailEffect();
-            // === 스노우볼 흔적 === //
-        }
-        else
-        {
-            m_fastZoneTrailMgr.SetTrailVec(true);       // 캐릭터가 달리지 않는다면 흔적 크기 초기활
-            SetSnowBallScale(true);                     // 캐릭터가 달리지 않는다면 이펙트 크기 초기화
         }
     }
 
@@ -139,156 +127,123 @@ public class SnowBallManager : MonoBehaviour
     {
         if(m_isUp == true)
         {
-            m_myCharacter.SetAnim_Push();                                   // 플레이어 Push Anim 실행
-            SetSnowBallTrailEffect(true);                                   // Snowball 이펙트 켜기
+            m_myCharacter.SetAnim_Push();     // 플레이어 Push Anim 실행
+
+
+            SetSnowBallTrailEffect(true);     // SnowBall(왼/오) 이펙트 켜기
             if(m_isPlayer == true)
-                SetCamEffect(true);                                         // 카메라 이펙트 켜기
+                SetCamEffect(true);           // 카메라 Splsh 이펙트 켜기
 
-            //InGameManager.m_fastZoneTrail.m_isTrailOn = true;
-            m_fastZoneTrailMgr.m_isTrailOn = true;
 
-            #region 눈덩이 크기 증가 & 카메라 줌아웃
+            #region 눈덩이 크기 증가
             m_tweener.Add(this.transform.DOScale(this.transform.localScale + m_snowBallIncreaseVec, .1f)
                     .SetEase(Ease.Linear)
                     .SetLoops(-1, LoopType.Incremental));
-            m_tweener.Add(this.transform.DOLocalMove(new Vector3(0, -1.7f, this.transform.localPosition.z + .02f), .1f)
+            m_tweener.Add(this.transform.DOLocalMove(new Vector3(0, -1.6f, this.transform.localPosition.z + m_increasePosZ), .1f)
                     .SetEase(Ease.Linear)
                     .SetLoops(-1, LoopType.Incremental));
             #endregion
         }
         else
         {
-            if(m_isPlayer == true)
-            {
-                #region 눈덩이 크기 감소 & 카메라 줌인
-                switch (m_curSnowBallSize)
-                {
-                    case eSnowBallSize.One:
-                        //InGameManager.m_snowGround.StopGroundMoving();
-                        InGameManager.m_plyMgr.SetAnim_GameOver();
-                        break;
+            if (m_isPlayer == true)
+                SetCamEffect(false);           // 카메라 Splsh 이펙트 끄기
 
-                    case eSnowBallSize.ThirtyFive:
-                        InGameManager.m_camMgr.SetFollowOffset(false);
-
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(15f, 15f, 15f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 14f), .3f)
-                                  .OnComplete(() =>
-                                  {
-                                      m_curSnowBallSize = eSnowBallSize.One;
-
-                                      m_tweenerD.Clear();
-                                      //m_snowBallIncreaseVec = new Vector3(.1f, .1f, .1f);
-
-                                      SetSphereCollider(true);          
-                                      SetSnowBallSize(true);
-                                      
-                                  }));
-                        break;
-
-                    case eSnowBallSize.Ninety:
-                        InGameManager.m_camMgr.SetFollowOffset(false);
+            #region 눈덩이 크기 감소
+            m_tweener.Add(this.transform.DOScale(this.transform.localScale - m_snowBallDecreaseVec, .1f)
+                    .SetEase(Ease.Linear)
+                    .SetLoops(-1, LoopType.Incremental));
+            m_tweener.Add(this.transform.DOLocalMove(new Vector3(0, -1.6f, this.transform.localPosition.z - m_decreasePosZ), .1f)
+                    .SetEase(Ease.Linear)
+                    .SetLoops(-1, LoopType.Incremental));
+            #endregion
 
 
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(35f, 35f, 35f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 22f), .3f)
-                                  .OnComplete(() =>
-                                  {
-                                      m_curSnowBallSize = eSnowBallSize.ThirtyFive;
 
-                                      m_tweenerD.Clear();
-                                      //m_snowBallIncreaseVec = new Vector3(.2f, .2f, .2f);
+            //#region 눈덩이 크기 감소 & 카메라 줌인
+            //switch (m_curSnowBallSize)
+            //{
+            //    case eSnowBallSize.One:
+            //        StopCoroutine(m_fastZoneTrailMgr.SetTrailVec(false));
+            //        StartCoroutine(m_fastZoneTrailMgr.SetTrailVec(true));           // 눈덩이 흔적 초기s
 
-                                      SetSphereCollider(true);
-                                      SetSnowBallSize(true);
-                                  }));
-                        break;
+            //        StopCoroutine(SetSnowBallEffectScale(false));
+            //        StartCoroutine(SetSnowBallEffectScale(true));                         // 눈덩이 튀기는 이펙트 초기화
 
-                    case eSnowBallSize.HundredFIf:
-                        InGameManager.m_camMgr.SetFollowOffset(false);
+            //        if (m_isPlayer == true)
+            //            InGameManager.m_plyMgr.SetAnim_GameOver();
+            //        else
+            //            m_parentTf.GetComponent<AIManager>().SetAiAnim_GameOver();
+
+            //        break;
 
 
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(80f, 80f, 80f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 44f), .3f)
-                                  .OnComplete(() =>
-                                  {
-                                      m_curSnowBallSize = eSnowBallSize.Ninety;
+            //    case eSnowBallSize.ThirtyFive:
+            //        InGameManager.m_camMgr.SetFollowOffset(false);
 
-                                      m_tweenerD.Clear();
-                                      //m_snowBallIncreaseVec = new Vector3(.3f, .3f, .3f);
+            //        m_tweenerD.Add(this.transform.DOScale(new Vector3(15f, 15f, 15f), .3f));
+            //        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 14f), .3f)
+            //                  .OnComplete(() =>
+            //                  {
+            //                      m_curSnowBallSize = eSnowBallSize.One;
 
-                                      SetSphereCollider(true);
-                                      SetSnowBallSize(true);
-                                  }));
-                        break;
-                }
-                #endregion
-            }
-            else
-            {
-                #region 눈덩이 크기 감소
-                switch (m_curSnowBallSize)
-                {
-                    case eSnowBallSize.One:
-                        //InGameManager.m_snowGround.StopGroundMoving();
-                        m_parentTf.GetComponent<AIManager>().SetAiAnim_GameOver();
-                        break;
+            //                      m_tweenerD.Clear();
 
-                    case eSnowBallSize.ThirtyFive:
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(15f, 15f, 15f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 14f), .3f)
-                                  .OnComplete(() =>
-                                  {
-                                      m_curSnowBallSize = eSnowBallSize.One;
+            //                      SetSphereCollider(true);
 
-                                      //float a_increaseNum = Random.Range(.05f, .12f);
-                                      //m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
+            //                      if (m_isPlayer == true)
+            //                          SetSnowBallSize(true);
+            //                      else
+            //                          SetSnowBallSize(true, false);
 
-                                      m_tweenerD.Clear();
+            //                  }));
+            //        break;
 
-                                      SetSphereCollider(true);
-                                      SetSnowBallSize(true, false);
-                                  }));
 
-                        break;
+            //    case eSnowBallSize.Ninety:
+            //        InGameManager.m_camMgr.SetFollowOffset(false);
 
-                    case eSnowBallSize.Ninety:
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(35f, 35f, 35f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 22f), .3f)
-                                  .OnComplete(() =>
-                                  {
-                                      m_curSnowBallSize = eSnowBallSize.ThirtyFive;
 
-                                      //float a_increaseNum = Random.Range(.1f, .2f);
-                                      //m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
+            //        m_tweenerD.Add(this.transform.DOScale(new Vector3(35f, 35f, 35f), .3f));
+            //        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 22f), .3f)
+            //                  .OnComplete(() =>
+            //                  {
+            //                      m_curSnowBallSize = eSnowBallSize.ThirtyFive;
 
-                                      m_tweenerD.Clear();
+            //                      m_tweenerD.Clear();
 
-                                      SetSphereCollider(true);
-                                      SetSnowBallSize(true, false);
-                                  }));
+            //                      SetSphereCollider(true);
 
-                        break;
 
-                    case eSnowBallSize.HundredFIf:
-                        m_tweenerD.Add(this.transform.DOScale(new Vector3(80f, 80f, 80f), .3f));
-                        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 44f), .3f)
-                                  .OnComplete(() =>
-                                  {
-                                      m_curSnowBallSize = eSnowBallSize.Ninety;
+            //                      if (m_isPlayer == true)
+            //                          SetSnowBallSize(true);
+            //                      else
+            //                          SetSnowBallSize(true, false);
+            //                  }));
+            //        break;
 
-                                      //float a_increaseNum = Random.Range(.2f, .3f);
-                                      //m_snowBallIncreaseVec = new Vector3(a_increaseNum, a_increaseNum, a_increaseNum);
+            //    case eSnowBallSize.HundredFIf:
+            //        InGameManager.m_camMgr.SetFollowOffset(false);
 
-                                      m_tweenerD.Clear();
 
-                                      SetSphereCollider(true);
-                                      SetSnowBallSize(true, false);
-                                  }));
-                        break;
-                }
-                #endregion
-            }
+            //        m_tweenerD.Add(this.transform.DOScale(new Vector3(80f, 80f, 80f), .3f));
+            //        m_tweenerD.Add(this.transform.DOLocalMove(new Vector3(0, 0, 44f), .3f)
+            //                  .OnComplete(() =>
+            //                  {
+            //                      m_curSnowBallSize = eSnowBallSize.Ninety;
+
+            //                      m_tweenerD.Clear();
+
+            //                      SetSphereCollider(true);
+
+            //                      if(m_isPlayer == true)
+            //                          SetSnowBallSize(true);
+            //                      else
+            //                          SetSnowBallSize(true, false);
+            //                  }));
+            //        break;
+            //}
+            //#endregion
         }
     }
 
@@ -432,18 +387,53 @@ public class SnowBallManager : MonoBehaviour
 
 
     #region 눈덩이 이펙트 관련
-    public void SetSnowBallScale(bool a_isReset)
+    public void SetSnowEffect(bool a_isStart)
     {
-        if(a_isReset == true)
+        if(a_isStart == true)
+        {
+            // === 눈바닥자취 크기 증감 코루틴 === //
+            StartCoroutine(m_fastZoneTrailMgr.SetTrailVec()); ;
+            // === 눈바닥자취 크기 증감 코루틴 === //
+
+
+            // === SnowBall(왼/오) 나오는 이펙트 크기 증감 코루틴 === //
+            StartCoroutine(SetSnowBallEffectScale());
+            // === SnowBall(왼/오) 나오는 이펙트 크기 증감 코루틴 === //
+
+
+            // === 눈덩이 자취 흔적 코루틴 === //
+            StartCoroutine(m_fastZoneTrailMgr.DequeueTrailOnSnowEffect());
+            // === 눈덩이 자취 흔적 코루틴 === //
+        }
+        else
+        {
+            StopCoroutine(m_fastZoneTrailMgr.SetTrailVec());
+            StopCoroutine(SetSnowBallEffectScale());
+            StopCoroutine(m_fastZoneTrailMgr.DequeueTrailOnSnowEffect());
+        }
+    }
+
+    /// <summary>
+    /// 눈덩이(왼/오)에서 나오는 이펙트 크기 증감 코루m_isSBEffectIncrease
+    /// </summary>
+    WaitForSeconds m_delayTime = new WaitForSeconds(.8f);
+    public bool m_isSBEffectIncrease = true;
+    private IEnumerator SetSnowBallEffectScale()
+    {
+        if (m_isSBEffectIncrease == false)
         {
             for (int n = 0; n < m_snowEffectTf.Length; n++)
-                m_snowEffectTf[n].localScale = new Vector3(1.5f, 1.5f, 1.5f);
+                m_snowEffectTf[n].localScale -= new Vector3(0.1f, 0.1f, 0.1f);
         }
         else
         {
             for (int n = 0; n < m_snowEffectTf.Length; n++)
-                m_snowEffectTf[n].localScale *= 2;
+                m_snowEffectTf[n].localScale += new Vector3(0.1f, 0.1f, 0.1f);
         }
+        
+        yield return m_delayTime;
+
+        SetSnowBallEffectScale();
     }
 
 
@@ -471,16 +461,6 @@ public class SnowBallManager : MonoBehaviour
     }
     #endregion
 
-
-    #region (GameState = Clear) 스노우볼 굴러가기
-    /// <summary>
-    /// Clear시 스노우볼 굴러가는 함수
-    /// </summary>
-    public void RollSnowBall()
-    {
-        
-    }
-    #endregion
 
 
     #region 눈덩이에 뭍히는 연출 & 눈덩이 크기 증가

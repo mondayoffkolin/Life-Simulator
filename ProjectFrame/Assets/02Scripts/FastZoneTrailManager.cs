@@ -4,20 +4,28 @@ using UnityEngine;
 
 public class FastZoneTrailManager : MonoBehaviour
 {
-    [Header("FastZone에서의 이펙트")]
-    [SerializeField] ParticleSystem[] m_fastZoneTrailEffect = null;
-    [SerializeField] GameObject[] m_fastZoneTrailEffect2 = null;
+    [Header("눈 지나간 흔적")]
+    [SerializeField] GameObject[] m_onTheSnowTrail = null;          // 눈바닥 위에서의 흔적 Obj
+    [SerializeField] GameObject[] m_onTheSoilTrail = null;          // 흙바닥 위에서의 흔적 Obj
 
 
     [Header("SnowBall 위치")]
     [SerializeField] private Transform m_snowballTf = null;       // 스노우볼 위치를 위한 변수
 
 
-    private Queue<GameObject> m_trailQueue = new Queue<GameObject>();
+    [Header("눈덩이 흔적 true면 흙바닥, false면 눈바닥")]
+    public bool m_isSnowTrailDequeue = true;
 
 
-    public bool m_isTrailOn = false;                     // 트레일 이펙트가 켜진상태인가 여부
-    private Vector3 m_trailVec = new Vector3(11, 1, 6);
+    [Header("눈덩이 흔적 증감 여부")]
+    public bool m_isTrailVecIncrease = true;
+
+
+    [HideInInspector] private Vector3 m_trailVec = new Vector3(5, 5, 5);
+
+
+    private Queue<GameObject> m_trailOnSnowQueue = new Queue<GameObject>();
+    private Queue<GameObject> m_trailOnSoilQueue = new Queue<GameObject>();
 
 
     // Start is called before the first frame update
@@ -28,14 +36,15 @@ public class FastZoneTrailManager : MonoBehaviour
 
 
 
+    #region 눈바닥 위에서의 자취
     /// <summary>
     /// (GameState = Start) 트레일 이펙트 풀링 함수
     /// </summary>
-    public void SetTrailPooling()
+    public void SetTrailOnSnowPooling()
     {
-        for(int n = 0; n < m_fastZoneTrailEffect2.Length; n++)
+        for(int n = 0; n < m_onTheSnowTrail.Length; n++)
         {
-            EnqueueTrailEffect(m_fastZoneTrailEffect2[n].gameObject);
+            EnqueueTrailOnSnowEffect(m_onTheSnowTrail[n].gameObject);
         }
     }
 
@@ -44,32 +53,103 @@ public class FastZoneTrailManager : MonoBehaviour
     /// 지나간 자리Obj 다시 큐에 넣기
     /// </summary>
     /// <param name="a_trailObj"></param>
-    public void EnqueueTrailEffect(GameObject a_trailObj)
+    public void EnqueueTrailOnSnowEffect(GameObject a_trailObj)
     {
         a_trailObj.SetActive(false);
-        m_trailQueue.Enqueue(a_trailObj);
+        m_trailOnSnowQueue.Enqueue(a_trailObj);
     }
 
     /// <summary>
     /// 지나간 자리Obj 큐에서 빼기
     /// </summary>
-    public void DequeueTrailEffect()
+    static float a_time = .1f;
+    WaitForSeconds m_delayTime = new WaitForSeconds(a_time);
+    public IEnumerator DequeueTrailOnSnowEffect()
     {
-        GameObject a_trailObj = m_trailQueue.Dequeue();
-        //a_trailObj.transform.position = m_playerTf.position;
-        a_trailObj.transform.position = m_snowballTf.position;
-        //a_trailObj.transform.rotation = m_playerTf.rotation;
-        a_trailObj.transform.rotation = m_snowballTf.rotation;
-        a_trailObj.transform.localScale = m_trailVec;
-        
+        if (m_isSnowTrailDequeue == true)
+        {
+            GameObject a_trailObj = m_trailOnSnowQueue.Dequeue();
+            a_trailObj.transform.position = m_snowballTf.position;
+            a_trailObj.transform.rotation = m_snowballTf.rotation;
+            a_trailObj.transform.localScale = m_trailVec;
 
-        a_trailObj.SetActive(true);
-    }
-    public void SetTrailVec(bool a_isReset)
-    {
-        if(a_isReset == true)
-            m_trailVec = new Vector3(11, 1, 6);
+            a_trailObj.SetActive(true);
+
+
+            yield return m_delayTime;
+            a_time += .1f;
+        }
         else
-            m_trailVec += new Vector3(m_trailVec.x + 0.001f, 1, m_trailVec.z + 0.001f);
+        {
+            GameObject a_trailObj = m_trailOnSoilQueue.Dequeue();
+            a_trailObj.transform.position = m_snowballTf.position;
+            a_trailObj.transform.rotation = m_snowballTf.rotation;
+            a_trailObj.transform.localScale = m_trailVec;
+
+            a_trailObj.SetActive(true);
+
+            yield return m_delayTime;
+            a_time -= .1f;
+        }
+
+        StartCoroutine(DequeueTrailOnSnowEffect());
     }
+    #endregion
+
+
+    #region 흙바닥 위에서의 자취
+    public void SetTrailOnSoilPooling()
+    {
+        for (int n = 0; n < m_onTheSoilTrail.Length; n++)
+        {
+            EnqueueTrailOnSoilEffect(m_onTheSoilTrail[n].gameObject);
+        }
+    }
+
+
+    public void EnqueueTrailOnSoilEffect(GameObject a_trailObj)
+    {
+        a_trailObj.SetActive(false);
+        m_trailOnSoilQueue.Enqueue(a_trailObj);
+    }
+
+    public IEnumerator DequeueTrailOnSoilEffect()
+    {
+        if (m_isSnowTrailDequeue == false)
+        {
+            GameObject a_trailObj = m_trailOnSoilQueue.Dequeue();
+            a_trailObj.transform.position = m_snowballTf.position;
+            a_trailObj.transform.rotation = m_snowballTf.rotation;
+            a_trailObj.transform.localScale = m_trailVec;
+
+            a_trailObj.SetActive(true);
+
+            yield return m_delayTime;
+            a_time -= .5f;
+
+            StartCoroutine(DequeueTrailOnSoilEffect());
+        }
+        else
+            StopCoroutine(DequeueTrailOnSoilEffect());
+    }
+    #endregion
+
+
+    /// <summary>
+    /// 지나간 자취 크기 증감 코루틴
+    /// </summary>
+    WaitForSeconds m_delayTime2 = new WaitForSeconds(.1f);
+    public IEnumerator SetTrailVec()
+    {
+        if (m_isTrailVecIncrease == false)
+            m_trailVec -= new Vector3(.05f, 0, .05f);
+        else
+            m_trailVec += new Vector3(.005f, 0, .005f);
+
+
+        yield return m_delayTime2;
+
+        StartCoroutine(SetTrailVec());
+    }
+
 }

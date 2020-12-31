@@ -94,11 +94,8 @@ public class PlayerManager : MonoBehaviour
     {
         SetAnimSpeedOrigin();
 
-        //this.transform.position = m_playerStartTf;
         this.transform.position = this.transform.position - new Vector3(0, 0, 100);
         this.transform.rotation = Quaternion.Euler(0, 0, 0);
-
-        //m_animCtrl.SetTrigger("Idle");
 
         m_playerState = ePlayerState.Idle;
     }
@@ -122,10 +119,6 @@ public class PlayerManager : MonoBehaviour
         m_animCtrl.ResetTrigger("Idle");
         m_animCtrl.SetTrigger("Push");
 
-        //if(m_playerRunSplashEffect != null)
-        //    m_playerRunSplashEffect.SetActive(true);
-
-
         m_playerState = ePlayerState.Run;
     }
     /// <summary>
@@ -145,8 +138,9 @@ public class PlayerManager : MonoBehaviour
                                 {
                                     m_playerState = ePlayerState.Happy;
 
+
                                     m_animCtrl.SetTrigger("Clear");
-                                    //m_playerRunSplashEffect.SetActive(false);
+
 
                                     // === 눈덩이 Player Obj에서 떼어낸 후 => 굴러가게 === //
                                     m_snowBallObj.transform.SetParent(m_playerParentTf.transform);
@@ -186,11 +180,6 @@ public class PlayerManager : MonoBehaviour
                                    //.AppendInterval(1f)
                                    .AppendCallback(() =>
                                    {
-                                       //InGameManager.m_camMgr.SetCamParent();           // 카메라 오브젝트 초기부모 오브젝트로
-                                   })
-                                   //.AppendInterval(1.5f)
-                                   .AppendCallback(() =>
-                                   {
                                        this.transform.DOKill();
 
                                        SetPlayerToStartPos();                                       // 플레이어 초기 시작 위치로
@@ -221,9 +210,6 @@ public class PlayerManager : MonoBehaviour
         for (int n = 0; n < m_characterMeshRdr.Length; n++)
             m_characterMeshRdr[n].enabled = false;                         // 캐릭터 렌더러 끄기
         
-
-        //m_playerRunSplashEffect.SetActive(false);                                  // 플레이어 달리는 이펙트 끄기
-
 
         StopPlayerMoving();                                               // 플레이어 움직임 Stop
 
@@ -294,7 +280,7 @@ public class PlayerManager : MonoBehaviour
     public virtual void SetAnimSpeedUp()
     {
         m_animCtrl.speed += 0.2f;
-        m_playerMovSpd += 1.1f;
+        m_playerMovSpd += 0.2f;
     }
     /// <summary>
     /// (GameState = Clear/End)골인/플레이어죽음 때 호출되는 함수
@@ -322,13 +308,22 @@ public class PlayerManager : MonoBehaviour
     {
         if(m_playerState == ePlayerState.Run)
         {
-            if (other.gameObject.layer == LayerMask.NameToLayer("FastZone"))
+            if(other.gameObject.layer == LayerMask.NameToLayer("SnowGround"))
+            {
+                print("눈바닥");
+                m_snowBallMgr.ResetTweener();
+                m_snowBallMgr.m_fastZoneTrailMgr.m_isTrailVecIncrease = true;           // 흔적 크기 증가
+                m_snowBallMgr.m_isSBEffectIncrease = true;                              // 눈 튀기는 이펙트 크기 증가
+                m_snowBallMgr.m_fastZoneTrailMgr.m_isSnowTrailDequeue = true;           // true 흙바닥 흔적 Dequeue
+
+
+                m_snowBallMgr.SetSnowBallSize(true);
+            }
+            else if (other.gameObject.layer == LayerMask.NameToLayer("FastZone"))
             {
                 playerFastSeq = DOTween.Sequence()
                                        .AppendCallback(() =>
                                        {
-                                           //InGameManager.m_fastZoneTrail.m_isTrailOn = true;
-
                                            if(m_camSplashEffect != null)
                                                m_camSplashEffect.Play();
 
@@ -345,8 +340,6 @@ public class PlayerManager : MonoBehaviour
                                        .AppendInterval(4f)
                                        .OnComplete(() =>
                                        {
-                                           //InGameManager.m_fastZoneTrail.m_isTrailOn = false;
-
                                            if(m_camSplashEffect != null)
                                                m_camSplashEffect.Stop();
 
@@ -363,7 +356,6 @@ public class PlayerManager : MonoBehaviour
             }
             else if(other.gameObject.layer == LayerMask.NameToLayer("GoalLine"))
             {
-                //InGameManager.m_snowGround.StopGroundMoving();
                 StopPlayerMoving();
                 SetAnim_Clear();
             }
@@ -371,5 +363,20 @@ public class PlayerManager : MonoBehaviour
     }
 
 
+    protected virtual void OnTriggerExit(Collider other)
+    {
+        if (m_playerState == ePlayerState.Run)
+        {
+            if (other.gameObject.layer == LayerMask.NameToLayer("SnowGround"))
+            {
+                print("눈바닥 위 아님");
+                m_snowBallMgr.ResetTweener();
+                m_snowBallMgr.m_fastZoneTrailMgr.m_isTrailVecIncrease = false;           // 흔적 크기 감소
+                m_snowBallMgr.m_isSBEffectIncrease = false;                              // 눈 튀기는 이펙트 크기 감소
+                m_snowBallMgr.m_fastZoneTrailMgr.m_isSnowTrailDequeue = false;           // false 눈바닥 흔적 Dequeue
 
+                m_snowBallMgr.SetSnowBallSize(false);
+            }
+        }
+    }
 }
