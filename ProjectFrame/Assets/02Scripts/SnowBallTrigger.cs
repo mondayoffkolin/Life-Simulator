@@ -5,7 +5,6 @@ using DG.Tweening;
 
 public class SnowBallTrigger : MonoBehaviour
 {
-    [SerializeField] SnowBallManager.eSnowBallSize m_eSnowBallSize = SnowBallManager.eSnowBallSize.None;
     public Transform m_snowBallTf = null;                            // 내 SnowBall
     [SerializeField] PlayerManager m_manager = null;                 // 내 SnowBall 의 플레이어
     [SerializeField] SnowBallManager m_snowBallMgr = null;           // 내 SnowBallManager 스크립트
@@ -28,29 +27,47 @@ public class SnowBallTrigger : MonoBehaviour
     }
     
 
+    private Vector3 BounceVec()
+    {
+        Vector3 a_bounceVec = Vector3.zero;
+        float a_x = Random.Range(-100, 100);
+        float a_z = Random.Range(-100, 100);
+
+        a_bounceVec = new Vector3(a_x, 0, a_z);
+
+        return a_bounceVec;
+    }
+
+
+    private Vector3 a_myBounce = Vector3.zero;
+    private Vector3 a_otherBounce = Vector3.zero;
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == LayerMask.NameToLayer("SnowBall") ||
-            other.gameObject.layer == LayerMask.NameToLayer("SnowBall_E"))
+        if (other.gameObject.layer == LayerMask.NameToLayer("SnowBall"))
         {
             // === SnowBall 크기 비교 === //
             if (m_snowBallTf.transform.localScale.x < other.transform.parent.localScale.x) 
-            {// 상대 SnowBall에 흡수
-                m_manager.m_playerState = ePlayerState.Death;
+            {
+                // === 튕겨나가기 === //
+                m_manager.PlayCrashEffect(true);
+                other.GetComponent<SnowBallTrigger>().m_manager.PlayCrashEffect(true);
 
+                a_myBounce = BounceVec();
+                a_otherBounce = BounceVec();
 
-                m_snowBallCollider.enabled = false;
-
-
-                m_manager.SetWhenInTheSnowBall();                                                              // 상대 SnowBall 안으로 흡수
-                m_snowBallMgr.ResetTweener();                                                                  // 내 트위너 초기화
-
-
-                m_eSnowBallSize = m_snowBallMgr.m_curSnowBallSize;                                             // 내 SnowBall 사이즈 상태
-                other.transform.parent.GetComponent<SnowBallManager>().ResetTweener();                         // 상대 트위너 초기화
-                other.transform.parent.GetComponent<SnowBallManager>().CharacterInSnowBall(m_eSnowBallSize);   // 상대 SnowBall 박힌 캐릭터 On & 눈덩이 크기 증가
+                m_manager.transform.DOMove(m_manager.transform.position + a_myBounce, .5f);
+                other.GetComponent<SnowBallTrigger>().m_manager.transform.DOMove(other.GetComponent<SnowBallTrigger>().m_manager.transform.position + a_otherBounce, .5f);            
+                // === 튕겨나가기 === //
             }
             // === SnowBall 크기 비교 === //
+        }
+        else if(other.gameObject.layer == LayerMask.NameToLayer("SnowMan"))
+        {
+            // === 눈사람 먹으면 눈덩이 커짐 === //
+            other.gameObject.SetActive(false);
+            m_snowBallMgr.ResetTweener();
+            m_snowBallMgr.GainSnowMan();
+            // === 눈사람 먹으면 눈덩이 커짐 === //
         }
     }
 }

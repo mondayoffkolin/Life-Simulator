@@ -11,13 +11,14 @@ public class CameraManager : MonoBehaviour
     [SerializeField] Transform m_lookPosTf = null;                // (GameState = Start)카메라가 이동중 바라볼 Tf
     [SerializeField] Transform m_originParentTf = null;
 
+
     [Header("카메라 블러")]
     [SerializeField] Kino.Motion m_motionBlur = null;
 
 
     public Quaternion TargetRotation;                              // (GameState = Play)최종적으로 축적된 Gap이 이 변수에 저장됨.
     public float m_rotationSpeed = 8;                             // (GameState = Play)터치시 플레이어 회전 스피드.
-    [SerializeField] private float m_originRotationSpeed = 5;                             // (GameState = Play)터치시 플레이어 회전 스피드.
+    [SerializeField] private float m_originRotationSpeed = 5;      // (GameState = Play)터치시 플레이어 회전 스피드.
     private Vector3 Gap = Vector3.zero;                            // (GameState = Play)회전 축적 값.
     //private Vector3 m_followOffset = new Vector3(0, 75, -90);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
     private Vector3 m_followOffset = new Vector3(0, 10, -15);      // (GameState = Play)카메라 Zoom In/Out 관련 벡터
@@ -177,7 +178,6 @@ public class CameraManager : MonoBehaviour
     {
         if(a_isStart == true)
         {
-            m_motionBlur.enabled = true;
             StartCoroutine(SetInActiveMotionBlur(true));
         }
         else

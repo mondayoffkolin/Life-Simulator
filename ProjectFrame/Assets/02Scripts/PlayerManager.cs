@@ -126,28 +126,10 @@ public class PlayerManager : MonoBehaviour
     /// </summary>
     public virtual void SetAnim_Clear()
     {
-        InGameManager.uniqueInstance.m_curGameState = InGameManager.eGameState.Clear;
+        m_animCtrl.SetTrigger("Clear");
 
-        m_snowBallMgr.SetSnowBallTrailEffect(false);                    // Snowball 이펙트 끄기
-
-        // === ClearPos로 이동 === //
-        playerClearSeq = DOTween.Sequence()
-                                .Append(this.transform.DOMove(m_clearTf.position, 1.5f))
-                                .Join(this.transform.DORotate(m_clearTf.eulerAngles, 1.5f))
-                                .OnComplete(() =>
-                                {
-                                    m_playerState = ePlayerState.Happy;
-
-
-                                    m_animCtrl.SetTrigger("Clear");
-
-
-                                    // === 눈덩이 Player Obj에서 떼어낸 후 => 굴러가게 === //
-                                    m_snowBallObj.transform.SetParent(m_playerParentTf.transform);
-                                    m_snowBallObj.transform.DORotate(Vector3.zero, 1f);
-                                    // === 눈덩이 Player Obj에서 떼어낸 후 => 굴러가게 === //
-                                });
-        // === ClearPos로 이동 === //
+        StopPlayerMoving();
+        PlayBoosterEffect(false);
     }
 
 
@@ -164,79 +146,14 @@ public class PlayerManager : MonoBehaviour
         m_snowBallMeshRdr.enabled = false;                        // 눈덩이 메쉬렌더러 끄기
 
 
-        m_snowBallMgr.StopRotateSnowBall();                       // 눈덩이 회전 끄기
         StopPlayerMoving();                                       // 플레이어 움직임 Stop
 
+        if(m_camSplashEffect != null)
+            m_camSplashEffect.Stop();                             // 카메라에 붙어있는 이펙트 끄기
 
-        m_camSplashEffect.Stop();                                 // 카메라에 붙어있는 이펙트 끄기
-        //m_playerRunSplashEffect.SetActive(false);                 // 플레이어 달리는 이펙트 끄기
         m_snowBallMgr.SetSnowBallTrailEffect(false);              // 눈덩이 이펙트 끄기
         m_snowBallMgr.SetCamEffect(false);                        // 카메라 이펙트 끄기
 
-
-        playerGameOverSeq = DOTween.Sequence()
-                                   .AppendInterval(2.5f)
-                                   //.Append(Camera.main.transform.DOLocalMove(new Vector3(0, 20f, -36f), 1f).SetEase(Ease.Linear))
-                                   //.AppendInterval(1f)
-                                   .AppendCallback(() =>
-                                   {
-                                       this.transform.DOKill();
-
-                                       SetPlayerToStartPos();                                       // 플레이어 초기 시작 위치로
-                                       SetAnim_Idle();
-
-                                       m_snowBallMgr.SetLocalScale();                               // 스노우볼 크기 초기화
-                                       m_snowBallMeshRdr.enabled = true;                            // 스노우볼 렌더링 켜기
-                                       for(int n = 0; n < m_characterMeshRdr.Length; n++)
-                                           m_characterMeshRdr[n].enabled = true;                           // 캐릭터 렌더러 끄기
-                                   })
-                                   .AppendInterval(2f)
-                                   .OnComplete(() =>
-                                   {
-                                       InGameManager.m_camMgr.CamToPlayerProduction();          // 카메라 연출
-                                   });
-    }
-
-
-    /// <summary>
-    /// 눈덩이에 파뭍혔을 때 실행함수
-    /// </summary>
-    public virtual void SetWhenInTheSnowBall()
-    {
-        m_playerState = ePlayerState.Death;
-
-
-        m_snowBallMeshRdr.enabled = false;                                 // 스노우볼 렌더링 끄기
-        for (int n = 0; n < m_characterMeshRdr.Length; n++)
-            m_characterMeshRdr[n].enabled = false;                         // 캐릭터 렌더러 끄기
-        
-
-        StopPlayerMoving();                                               // 플레이어 움직임 Stop
-
-
-        playerGameOverSeq = DOTween.Sequence()
-                                   .AppendInterval(1.5f)
-                                   //.Append(Camera.main.transform.DOLocalMove(new Vector3(0, 20f, -36f), 1f).SetEase(Ease.Linear))
-                                   //.AppendInterval(1f)
-                                   .AppendCallback(() =>
-                                   {
-                                       InGameManager.m_camMgr.SetCamParent();         // 카메라 오브젝트 초기부모 오브젝트로
-                                   })
-                                   .AppendInterval(1f)
-                                   .AppendCallback(() =>
-                                   {
-                                       SetPlayerToStartPos();                         // 플레이어 초기 시작 위치로
-
-                                       m_snowBallMgr.SetLocalScale();                 // 스노우볼 크기 초기화
-                                       m_snowBallMeshRdr.enabled = true;              // 스노우볼 렌더링 켜기
-                                       for (int n = 0; n < m_characterMeshRdr.Length; n++)
-                                           m_characterMeshRdr[n].enabled = true;             // 스노우볼 렌더링 켜기
-                                   })
-                                   .AppendInterval(1f)
-                                   .OnComplete(() =>
-                                   {
-                                       InGameManager.m_camMgr.CamToPlayerProduction();          // 카메라 연출
-                                   });
     }
     #endregion
 
@@ -254,7 +171,7 @@ public class PlayerManager : MonoBehaviour
 
             yield return null;
 
-            StartCoroutine(PlayerMoving());
+            StartCoroutine("PlayerMoving");
         }
     }
     /// <summary>
@@ -267,12 +184,12 @@ public class PlayerManager : MonoBehaviour
         m_snowBallMgr.ResetTweener();
         m_snowBallMgr.SetSphereCollider(false);
 
-        m_isMoving = false;
+        //m_isMoving = false;
         m_playerRigid.isKinematic = true;
         SetAnimSpeedOrigin();                       // 플레이어 스피드 1, 기본스피드로 초기화
-        StopCoroutine(PlayerMoving());              // 플레이어 움직임 중단
+        StopCoroutine("PlayerMoving");              // 플레이어 움직임 중단
     }
-    // 0 0 -763
+
 
     /// <summary>
     /// (GameState = Play)눈덩이 커질때마다 호출되는 함수 (증가)
@@ -281,6 +198,11 @@ public class PlayerManager : MonoBehaviour
     {
         m_animCtrl.speed += 0.2f;
         m_playerMovSpd += 0.2f;
+    }
+    public virtual void SetAnimSpeedDown()
+    {
+        m_animCtrl.speed -= 0.2f;
+        m_playerMovSpd -= 0.2f;
     }
     /// <summary>
     /// (GameState = Clear/End)골인/플레이어죽음 때 호출되는 함수
@@ -293,29 +215,57 @@ public class PlayerManager : MonoBehaviour
     #endregion
 
 
-    #region 플레이어 충돌 이펙트
-    public virtual void PlayCrashEffect(int a_num)
+    #region 플레이어 이펙트
+    public virtual void PlayCrashEffect(bool a_isPlay)
     {
-        if (a_num == 0)
+        if (a_isPlay == true)
             m_crashHitEffect.Play();
-        else if (a_num == 1)
+        else
             m_crashRockEffect.Play();
+    }
+
+    public virtual void PlayBoosterEffect(bool a_isPlay)
+    {
+        if(a_isPlay == true)
+        {
+            if (m_snowBallRunSplashEffect != null)
+                m_snowBallRunSplashEffect.Play();
+
+            if (m_playerRunSplashEffect != null)
+                m_playerRunSplashEffect.Play();
+
+            if(m_camSplashEffect != null)
+                m_camSplashEffect.Play();
+        }
+        else
+        {
+            if (m_snowBallRunSplashEffect != null)
+                m_snowBallRunSplashEffect.Stop();
+
+            if (m_playerRunSplashEffect != null)
+                m_playerRunSplashEffect.Stop();
+
+            if(m_camSplashEffect != null)
+                m_camSplashEffect.Stop();                                 // 카메라에 붙어있는 이펙트 끄기
+        }
     }
     #endregion
 
 
+    private Transform m_goalPoint = null;
     protected virtual void OnTriggerEnter(Collider other)
     {
-        if(m_playerState == ePlayerState.Run)
+        if (m_playerState == ePlayerState.Run)
         {
-            if(other.gameObject.layer == LayerMask.NameToLayer("SnowGround"))
+            if (other.gameObject.layer == LayerMask.NameToLayer("SnowGround"))
             {
                 print("눈바닥");
+                m_playerMovSpd -= .5f;
+
+                m_snowBallMgr.SetCamEffect(false);                                      // 카메라 Splash 이펙트 끄기
                 m_snowBallMgr.ResetTweener();
-                m_snowBallMgr.m_fastZoneTrailMgr.m_isTrailVecIncrease = true;           // 흔적 크기 증가
                 m_snowBallMgr.m_isSBEffectIncrease = true;                              // 눈 튀기는 이펙트 크기 증가
                 m_snowBallMgr.m_fastZoneTrailMgr.m_isSnowTrailDequeue = true;           // true 흙바닥 흔적 Dequeue
-
 
                 m_snowBallMgr.SetSnowBallSize(true);
             }
@@ -356,8 +306,27 @@ public class PlayerManager : MonoBehaviour
             }
             else if(other.gameObject.layer == LayerMask.NameToLayer("GoalLine"))
             {
-                StopPlayerMoving();
-                SetAnim_Clear();
+                InGameManager.uniqueInstance.m_curGameState = InGameManager.eGameState.Clear;
+
+                // === AI들 멈춤 === //
+                InGameManager.uniqueInstance.GameClear();      
+                // === AI들 멈춤 === //
+
+
+                // === 골인 지점으로 === //
+                m_goalPoint = GameObject.FindGameObjectWithTag("PlayerGoalPoint").transform;
+                this.transform.DOMove(m_goalPoint.position, .1f);
+                this.transform.DORotate(m_goalPoint.eulerAngles, .1f);
+                // === 골인 지점으로 === //
+
+
+                InGameManager.m_camMgr.SetMotionBlur(true);
+                m_snowBallMgr.m_fastZoneTrailMgr.SetDequeueTrail(false);
+                m_playerMovSpd = 5f;
+                PlayBoosterEffect(true);
+
+
+                m_snowBallMgr.SetSnowBallSize(false);
             }
         }
     }
@@ -370,8 +339,10 @@ public class PlayerManager : MonoBehaviour
             if (other.gameObject.layer == LayerMask.NameToLayer("SnowGround"))
             {
                 print("눈바닥 위 아님");
+                m_playerMovSpd += .5f;
+
+                m_snowBallMgr.SetCamEffect(true);                                       // 카메라 Splash 이펙트 켜기
                 m_snowBallMgr.ResetTweener();
-                m_snowBallMgr.m_fastZoneTrailMgr.m_isTrailVecIncrease = false;           // 흔적 크기 감소
                 m_snowBallMgr.m_isSBEffectIncrease = false;                              // 눈 튀기는 이펙트 크기 감소
                 m_snowBallMgr.m_fastZoneTrailMgr.m_isSnowTrailDequeue = false;           // false 눈바닥 흔적 Dequeue
 

@@ -15,6 +15,13 @@ public enum eLevel
 
 public class AIManager : PlayerManager
 {
+    [Header("MeshRender 관련")]
+    [SerializeField] float m_appearTime = 0f;
+    [SerializeField] ParticleSystem m_appearEffect = null;
+    [SerializeField] SkinnedMeshRenderer[] m_aiSkinMeshRdr = null;
+    [SerializeField] MeshRenderer m_meshRdr = null;
+
+
     [Header("Ai Level")]
     [SerializeField] private eLevel m_level = eLevel.None;
 
@@ -37,6 +44,26 @@ public class AIManager : PlayerManager
     {
         base.Start();
     }
+
+
+    #region AI 등장 연출
+    public void AppearProduction()
+    {
+        StartCoroutine("AppearPd");
+    }
+
+    private IEnumerator AppearPd()
+    {
+        yield return new WaitForSeconds(m_appearTime);
+
+        m_appearEffect.Play();
+
+        for (int n = 0; n < m_aiSkinMeshRdr.Length; n++)
+            m_aiSkinMeshRdr[n].enabled = true;
+
+        m_meshRdr.enabled = true;
+    }
+    #endregion
 
 
     #region (GameState = Ready) AI 시작위치 찾기
@@ -84,22 +111,11 @@ public class AIManager : PlayerManager
     /// </summary>
     public override void SetAnim_Clear()
     {
-        // === ClearPos로 이동 === //
-        playerClearSeq = DOTween.Sequence()
-                                .Append(this.transform.DOMove(m_clearTf.position, 1.5f))
-                                .Join(this.transform.DORotate(m_clearTf.eulerAngles, 1.5f))
-                                .OnComplete(() =>
-                                {
-                                    m_playerState = ePlayerState.Happy;
+        m_playerState = ePlayerState.Happy;
 
-                                    m_animCtrl.SetTrigger("Clear");
+        m_animCtrl.SetTrigger("Clear");
 
-                                    // === 눈덩이 Player Obj에서 떼어낸 후 => 굴러가게 === //
-                                    m_snowBallObj.transform.SetParent(m_playerParentTf.transform);
-                                    m_snowBallObj.transform.DORotate(Vector3.zero, 1f);
-                                    // === 눈덩이 Player Obj에서 떼어낸 후 => 굴러가게 === //
-                                });
-        // === ClearPos로 이동 === //
+        InGameManager.uniqueInstance.GameOver();
 
         this.gameObject.SetActive(false);
     }
@@ -115,79 +131,12 @@ public class AIManager : PlayerManager
 
 
         m_snowBallMeshRdr.enabled = false;                          // 눈덩이 메쉬렌더러 끄기
-        //m_characterMeshRdr.enabled = false;                       // 캐릭터 렌더러 끄기
 
 
-        m_snowBallMgr.StopRotateSnowBall();                         // 스노우볼 회전 멈추기
         StopPlayerMoving();                                         // 플레이어 움직임 Stop
 
 
         m_snowBallMgr.SetSnowBallTrailEffect(false);                // 눈덩이 이펙트 끄기
-
-
-        playerGameOverSeq = DOTween.Sequence()
-                       .AppendInterval(1.5f)
-                       .AppendCallback(() =>
-                       {
-                           this.transform.DOKill();
-
-                           SetAnim_Idle();
-                           SetPlayerToStartPos();                         // 플레이어 초기 시작 위치로
-                           SetAIPath();                                 // 경로 다시설정
-                           
-                           //m_snowBallMgr.SetLocalScale();                 // 스노우볼 크기 초기화
-                           m_snowBallMeshRdr.enabled = true;              // 스노우볼 렌더링 켜기
-                           for (int n = 0; n < m_characterMeshRdr.Length; n++)
-                               m_characterMeshRdr[n].enabled = true;             // 캐릭터 렌더러 끄기
-                       })
-                       .AppendInterval(2f)
-                       .OnComplete(() =>
-                       {
-                           SetAnim_Push();                                  // 애니메이션 Push 변경
-                           m_isMoving = true;                               // 움직임 true
-                           m_snowBallMgr.SetSphereCollider(true);           // SnowBall 콜라이더 On
-                           m_snowBallMgr.SetSnowBallSize(true, false);      // SnowBall 사이즈 Up
-                           StartCoroutine(PlayerMoving());                  // 움직임 시작!
-                       });
-    }
-
-
-    public override void SetWhenInTheSnowBall()
-    {
-        m_playerState = ePlayerState.Death;
-
-        m_snowBallMeshRdr.enabled = false;                                 // 스노우볼 렌더링 끄기
-        for (int n = 0; n < m_characterMeshRdr.Length; n++)
-            m_characterMeshRdr[n].enabled = false;                                // 캐릭터 렌더러 끄기
-
-
-
-        StopPlayerMoving();                                               // 플레이어 움직임 Stop
-
-
-        playerGameOverSeq = DOTween.Sequence()
-                       .AppendInterval(3.2f)
-                       .AppendCallback(() =>
-                       {
-                           SetPlayerToStartPos();                         // 플레이어 초기 시작 위치로
-                           SetAIPath();                                   // 경로 다시설정
-
-
-                           m_snowBallMgr.SetLocalScale();                 // 스노우볼 크기 초기화
-                           m_snowBallMeshRdr.enabled = true;              // 스노우볼 렌더링 켜기
-                           for (int n = 0; n < m_characterMeshRdr.Length; n++)
-                               m_characterMeshRdr[n].enabled = true;             // 캐릭터 렌더링 켜기
-                       })
-                       .AppendInterval(3f)
-                       .OnComplete(() =>
-                       {
-                           SetAnim_Push();
-                           m_isMoving = true;
-                           //m_snowBallMgr.RotateSnowBall();
-                           m_snowBallMgr.SetSphereCollider(true);
-                           m_snowBallMgr.SetSnowBallSize(true, false);
-                           StartCoroutine(PlayerMoving());
-                       });
     }
     #endregion
 
@@ -224,14 +173,13 @@ public class AIManager : PlayerManager
         {
             // === 지경 Path로 이동 === //
             float a_dis = (this.transform.position - m_aiPathTf[m_pathCount]).sqrMagnitude;
-            if (a_dis < 150f)
+            if (a_dis < 50f)
                 m_pathCount += 1;
             else
             {
                 this.transform.Translate(Vector3.forward * m_playerMovSpd, Space.Self);
                 this.transform.DOLookAt(m_aiPathTf[m_pathCount], 1.5f);
             }
-            //this.transform.Translate(Vector3.forward * m_playerMovSpd, Space.Self);
             // === 지경 Path로 이동 === //
 
             yield return new WaitForSeconds(0.01f);
@@ -245,15 +193,14 @@ public class AIManager : PlayerManager
     /// </summary>
     public override void StopPlayerMoving()
     {
-        //base.StopPlayerMoving();
-        m_snowBallMeshRdr.enabled = false;                                 // 스노우볼 렌더링 끄기
+        m_snowBallMeshRdr.enabled = false;                 // 스노우볼 렌더링 끄기
 
         m_snowBallMgr.ResetTweener();
         m_snowBallMgr.SetSphereCollider(false);
 
         m_isMoving = false;
         m_playerRigid.isKinematic = true;
-        StopCoroutine(PlayerMoving());              // 플레이어 움직임 중단
+        StopCoroutine(PlayerMoving());                   // 플레이어 움직임 중단
     }
 
     /// <summary>
@@ -261,9 +208,11 @@ public class AIManager : PlayerManager
     /// </summary>
     public override void SetAnimSpeedUp()
     {
-        float a_rnd = Random.Range(.8f, 1.1f);
-        m_animCtrl.speed += a_rnd;
-        m_playerMovSpd += a_rnd;
+        base.SetAnimSpeedUp();
+    }
+    public override void SetAnimSpeedDown()
+    {
+        base.SetAnimSpeedDown();
     }
     /// <summary>
     /// (GameState = Clear/End)골인/플레이어죽음 때 호출되는 함수
@@ -276,9 +225,9 @@ public class AIManager : PlayerManager
 
 
     #region 플레이어 충돌 이펙트
-    public override void PlayCrashEffect(int a_num)
+    public override void PlayCrashEffect(bool a_isPlay)
     {
-        base.PlayCrashEffect(a_num);
+        base.PlayCrashEffect(a_isPlay);
     }
     #endregion
 
@@ -287,7 +236,17 @@ public class AIManager : PlayerManager
     {
         if (m_playerState == ePlayerState.Run)
         {
-            if (other.gameObject.layer == LayerMask.NameToLayer("FastZone"))
+            if (other.gameObject.layer == LayerMask.NameToLayer("SnowGround"))
+            {
+                m_playerMovSpd -= .5f;
+
+                m_snowBallMgr.ResetTweener();
+                m_snowBallMgr.m_isSBEffectIncrease = true;                              // 눈 튀기는 이펙트 크기 증가
+                m_snowBallMgr.m_fastZoneTrailMgr.m_isSnowTrailDequeue = true;           // true 흙바닥 흔적 Dequeue
+
+                m_snowBallMgr.SetSnowBallSize(true);
+            }
+            else if (other.gameObject.layer == LayerMask.NameToLayer("FastZone"))
             {
                 playerFastSeq = DOTween.Sequence()
                                        .AppendCallback(() =>
@@ -309,4 +268,21 @@ public class AIManager : PlayerManager
     }
 
 
+    protected override void OnTriggerExit(Collider other)
+    {
+        if (m_playerState == ePlayerState.Run)
+        {
+            if (other.gameObject.layer == LayerMask.NameToLayer("SnowGround"))
+            {
+                print("눈바닥 위 아님");
+                m_playerMovSpd += .5f;
+
+                m_snowBallMgr.ResetTweener();
+                m_snowBallMgr.m_isSBEffectIncrease = false;                              // 눈 튀기는 이펙트 크기 감소
+                m_snowBallMgr.m_fastZoneTrailMgr.m_isSnowTrailDequeue = false;           // false 눈바닥 흔적 Dequeue
+
+                m_snowBallMgr.SetSnowBallSize(false);
+            }
+        }
+    }
 }

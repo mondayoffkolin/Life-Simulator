@@ -9,6 +9,7 @@ TagManager:
   - PlayerStartPos
   - CameraStartPos
   - SnowBall
+  - PlayerGoalPoint
   layers:
   - Default
   - TransparentFX
@@ -25,15 +26,15 @@ TagManager:
   - FastZone
   - GoalLine
   - Enemy
-  - SnowBall_E
+  - 
   - PostProcess
   - Enviornment
   - SnowTrail
-  - SoiliTrail
+  - SoilTrail
   - SnowGround
-  - 
-  - 
-  - 
+  - SnowMan
+  - SoilGround
+  - BonusCube
   - 
   - 
   - 

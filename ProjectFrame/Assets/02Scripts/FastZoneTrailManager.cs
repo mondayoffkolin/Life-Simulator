@@ -17,11 +17,7 @@ public class FastZoneTrailManager : MonoBehaviour
     public bool m_isSnowTrailDequeue = true;
 
 
-    [Header("눈덩이 흔적 증감 여부")]
-    public bool m_isTrailVecIncrease = true;
-
-
-    [HideInInspector] private Vector3 m_trailVec = new Vector3(5, 5, 5);
+    private Vector3 m_trailVec = Vector3.zero;
 
 
     private Queue<GameObject> m_trailOnSnowQueue = new Queue<GameObject>();
@@ -31,7 +27,6 @@ public class FastZoneTrailManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
     }
 
 
@@ -42,7 +37,9 @@ public class FastZoneTrailManager : MonoBehaviour
     /// </summary>
     public void SetTrailOnSnowPooling()
     {
-        for(int n = 0; n < m_onTheSnowTrail.Length; n++)
+        m_trailVec = new Vector3(8, 8, 8);
+
+        for (int n = 0; n < m_onTheSnowTrail.Length; n++)
         {
             EnqueueTrailOnSnowEffect(m_onTheSnowTrail[n].gameObject);
         }
@@ -62,37 +59,52 @@ public class FastZoneTrailManager : MonoBehaviour
     /// <summary>
     /// 지나간 자리Obj 큐에서 빼기
     /// </summary>
-    static float a_time = .1f;
+    public void SetDequeueTrail(bool a_isTrailOn)
+    {
+        if (a_isTrailOn == true)
+        {
+            StartCoroutine("DequeueTrailOnSnowEffect");
+        }
+        else
+        {
+            StopCoroutine("DequeueTrailOnSnowEffect");
+
+            m_trailVec = new Vector3(.01f, 0, .01f);
+        }
+    }
+
+
+    static float a_time = .2f;
     WaitForSeconds m_delayTime = new WaitForSeconds(a_time);
     public IEnumerator DequeueTrailOnSnowEffect()
     {
         if (m_isSnowTrailDequeue == true)
         {
-            GameObject a_trailObj = m_trailOnSnowQueue.Dequeue();
+
+            GameObject a_trailObj = m_trailOnSnowQueue.Dequeue();           // 눈길에서 흔적
             a_trailObj.transform.position = m_snowballTf.position;
             a_trailObj.transform.rotation = m_snowballTf.rotation;
+            m_trailVec = m_trailVec + new Vector3(.05f, 0, .05f);
             a_trailObj.transform.localScale = m_trailVec;
 
             a_trailObj.SetActive(true);
 
-
             yield return m_delayTime;
-            a_time += .1f;
         }
         else
         {
-            GameObject a_trailObj = m_trailOnSoilQueue.Dequeue();
+            GameObject a_trailObj = m_trailOnSoilQueue.Dequeue();          // 흙바닥에서 흔적
             a_trailObj.transform.position = m_snowballTf.position;
             a_trailObj.transform.rotation = m_snowballTf.rotation;
+            m_trailVec = m_trailVec - new Vector3(.4f, 0, .4f);
             a_trailObj.transform.localScale = m_trailVec;
 
             a_trailObj.SetActive(true);
 
             yield return m_delayTime;
-            a_time -= .1f;
         }
 
-        StartCoroutine(DequeueTrailOnSnowEffect());
+        StartCoroutine("DequeueTrailOnSnowEffect");
     }
     #endregion
 
@@ -112,44 +124,15 @@ public class FastZoneTrailManager : MonoBehaviour
         a_trailObj.SetActive(false);
         m_trailOnSoilQueue.Enqueue(a_trailObj);
     }
-
-    public IEnumerator DequeueTrailOnSoilEffect()
-    {
-        if (m_isSnowTrailDequeue == false)
-        {
-            GameObject a_trailObj = m_trailOnSoilQueue.Dequeue();
-            a_trailObj.transform.position = m_snowballTf.position;
-            a_trailObj.transform.rotation = m_snowballTf.rotation;
-            a_trailObj.transform.localScale = m_trailVec;
-
-            a_trailObj.SetActive(true);
-
-            yield return m_delayTime;
-            a_time -= .5f;
-
-            StartCoroutine(DequeueTrailOnSoilEffect());
-        }
-        else
-            StopCoroutine(DequeueTrailOnSoilEffect());
-    }
     #endregion
 
 
     /// <summary>
-    /// 지나간 자취 크기 증감 코루틴
+    /// 눈사람 먹었을때 눈덩이 자취 크기 증가
     /// </summary>
-    WaitForSeconds m_delayTime2 = new WaitForSeconds(.1f);
-    public IEnumerator SetTrailVec()
+    public void GainSnowMan()
     {
-        if (m_isTrailVecIncrease == false)
-            m_trailVec -= new Vector3(.05f, 0, .05f);
-        else
-            m_trailVec += new Vector3(.005f, 0, .005f);
-
-
-        yield return m_delayTime2;
-
-        StartCoroutine(SetTrailVec());
+        m_trailVec += new Vector3(1f, 0, 1f);
     }
 
 }

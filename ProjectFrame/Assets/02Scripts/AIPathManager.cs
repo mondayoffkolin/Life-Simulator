@@ -4,14 +4,6 @@ using UnityEngine;
 
 public class AIPathManager : MonoBehaviour
 {
-    //[Header("플레이하고 있는 스테이지 경로 개수")]
-    //[SerializeField] private Transform[] m_pathRoots = null;
-
-
-    //[Header("특정 경로 오브젝트의 자식개수만큼의 Tf")]
-    //[SerializeField] private Transform[] m_childPathRoot = null;
-
-
     /// <summary>
     /// (GameStage = Ready/Play) Ai가 지나갈 Path 설정 
     /// </summary>
@@ -51,16 +43,16 @@ public class AIPathManager : MonoBehaviour
         switch (a_aiLevel)
         {
             case eLevel.Low:        // AI 난이도 하
-                a_x = Random.Range(-250, 250);
+                a_x = Random.Range(-20, 20);
                 break;
 
-            case eLevel.Middle:        // AI 난이도 하
+            case eLevel.Middle:        // AI 난이도 
                 a_x = Random.Range(-400, 400);
                 break;
 
-            case eLevel.High:        // AI 난이도 하
+            case eLevel.High:        // AI 난이도 상
                 //a_x = 0;
-                a_x = Random.Range(-600, 600);
+                a_x = Random.Range(-50, 50);
                 break;
         }
 
